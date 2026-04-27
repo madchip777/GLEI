@@ -317,10 +317,6 @@ node_modules/
 *.dsw
 *.dsp
 
-# Visual Studio 6 technical files
-*.ncb
-*.aps
-
 # Visual Studio LightSwitch build output
 **/*.HTMLClient/GeneratedArtifacts
 **/*.DesktopClient/GeneratedArtifacts
@@ -420,7 +416,6 @@ FodyWeavers.xsd
 /composer.phar
 
 /vendor/
-node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -450,4 +445,3 @@ Homestead.json
 .phpactor.json
 auth.json
 .idea/workspace.xml
-/.idea

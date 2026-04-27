@@ -6,5 +6,3 @@ return [
 	'allowed_methods' => ['*'],
 	'allowed_headers' => ['*'],
 ];
-
-?>

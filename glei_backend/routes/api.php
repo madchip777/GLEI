@@ -43,10 +43,10 @@ Route::post('/login', function (Request $request) use ($users) {
     }
 
     return response()->json(['message' => 'Invalid credentials'], 401);
-    
-}); 
 
-Route::middleware('fakeauth')->get('/profile', function () {
+});
+
+Route::middleware('fakeAuth')->get('/profile', function () {
     return response()->json([
         'message' => 'You are authenticated!',
         'user' => 'Fake user data'

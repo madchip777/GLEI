@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'fakeauth' => \App\Http\Middleware\FakeAuth::class,
+            'fakeAuth' => \App\Http\Middleware\FakeAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
