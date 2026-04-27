@@ -15,16 +15,28 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->enum('role', ['user', 'admin','super_admin'])->default('user');
+            $table->string("meterial")->nullable();
+            $table->integer("post_num")->nullable();
+            $table->timestamp("created_at");
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamp('created_at');
+        });
+
+        Schema::create('softwares', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->enum("type",["dev","cyber","all","administration","system","server","other"]);
+        });
+
+        Schema::create('user_software', function (Blueprint $table) {
+            $table->foreignId("user_id")->constrained()->onDelete("cascade");
+            $table->foreignId("software_id")->constrained()->onDelete("cascade");
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -43,6 +55,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('softwares');
+        Schema::dropIfExists('user_software');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }
