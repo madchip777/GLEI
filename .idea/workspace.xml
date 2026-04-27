@@ -4,14 +4,85 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="76954999-4419-4767-8a64-6b0cab72e9a3" name="Changes" comment="" />
+    <list default="true" id="76954999-4419-4767-8a64-6b0cab72e9a3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/app/Http/Controllers/Api/AuthController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/Repositories/Interfaces/UserRepositoryInterface.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/Repositories/MockUserRepository.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/Services/AuthService.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/GLEI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/GLEI.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/DB_fil_rouge.drawio" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/FakeLogo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/Grille évaluation.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/ListeOrgaInteractionEtPage.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/PROJET FIL ROUGE GLOBAL.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/ReadmeDOCS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/ShemaInfraTheo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/api.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/config.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/upload.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/.editorconfig" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/.env.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/app/Http/Controllers/Controller.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/app/Models/User.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/app/Providers/AppServiceProvider.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/artisan" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/app.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/cache/packages.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/cache/services.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/providers.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/composer.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/composer.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/app.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/auth.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/cache.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/database.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/filesystems.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/logging.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/mail.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/queue.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/services.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/config/session.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/database/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/database/factories/UserFactory.php" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/factories/UserFactory.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/database/migrations/0001_01_01_000000_create_users_table.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/database/migrations/0001_01_01_000001_create_messages_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/migrations/0001_01_01_000001_create_messages_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/database/migrations/0001_01_01_000002_create_tickets_table.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/database/seeders/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/seeders/DatabaseSeeder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/phpunit.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/routes/console.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/routes/web.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/app/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/app/private/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/app/public/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/cache/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/cache/data/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/sessions/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/testing/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/views/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/tests/Feature/ExampleTest.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/tests/Pest.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/tests/TestCase.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/tests/Unit/ExampleTest.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glei_backend/vite.config.js" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ComposerSettings">
-    <execution />
+  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
+    <pharConfigPath>$PROJECT_DIR$/backend/composer.json</pharConfigPath>
+    <execution>
+      <executable path="composer" />
+    </execution>
   </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
@@ -21,8 +92,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="PHP File" />
         <option value="HTML File" />
+        <option value="PHP File" />
       </list>
     </option>
   </component>
@@ -33,7 +104,7 @@
     <commands />
     <urls />
   </component>
-  <component name="PhpWorkspaceProjectConfiguration">
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="$PROJECT_DIR$/../../../../wamp64/bin/php/php8.0.30/php.exe">
     <include_path>
       <path value="$PROJECT_DIR$/glei_frontend/vendor/inertiajs/inertia-laravel" />
       <path value="$PROJECT_DIR$/glei_frontend/vendor/paragonie/constant_time_encoding" />
@@ -167,7 +238,123 @@
       <path value="$PROJECT_DIR$/glei_frontend/vendor/pragmarx/google2fa" />
       <path value="$PROJECT_DIR$/glei_frontend/vendor/carbonphp/carbon-doctrine-types" />
       <path value="$PROJECT_DIR$/glei_frontend/vendor/fruitcake/php-cors" />
+      <path value="$PROJECT_DIR$/backend/vendor/nette/utils" />
+      <path value="$PROJECT_DIR$/backend/vendor/nikic/php-parser" />
+      <path value="$PROJECT_DIR$/backend/vendor/league/commonmark" />
+      <path value="$PROJECT_DIR$/backend/vendor/league/config" />
+      <path value="$PROJECT_DIR$/backend/vendor/league/flysystem" />
+      <path value="$PROJECT_DIR$/backend/vendor/league/flysystem-local" />
+      <path value="$PROJECT_DIR$/backend/vendor/league/mime-type-detection" />
+      <path value="$PROJECT_DIR$/backend/vendor/nesbot/carbon" />
+      <path value="$PROJECT_DIR$/backend/vendor/ramsey/collection" />
+      <path value="$PROJECT_DIR$/backend/vendor/ramsey/uuid" />
+      <path value="$PROJECT_DIR$/backend/vendor/spatie/backtrace" />
+      <path value="$PROJECT_DIR$/backend/vendor/spatie/error-solutions" />
+      <path value="$PROJECT_DIR$/backend/vendor/spatie/flare-client-php" />
+      <path value="$PROJECT_DIR$/backend/vendor/spatie/ignition" />
+      <path value="$PROJECT_DIR$/backend/vendor/spatie/laravel-ignition" />
+      <path value="$PROJECT_DIR$/backend/vendor/vlucas/phpdotenv" />
+      <path value="$PROJECT_DIR$/backend/vendor/dflydev/dot-access-data" />
+      <path value="$PROJECT_DIR$/backend/vendor/egulias/email-validator" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/framework" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/pint" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/prompts" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/sail" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/sanctum" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/serializable-closure" />
+      <path value="$PROJECT_DIR$/backend/vendor/laravel/tinker" />
+      <path value="$PROJECT_DIR$/backend/vendor/mockery/mockery" />
+      <path value="$PROJECT_DIR$/backend/vendor/monolog/monolog" />
+      <path value="$PROJECT_DIR$/backend/vendor/myclabs/deep-copy" />
+      <path value="$PROJECT_DIR$/backend/vendor/phar-io/manifest" />
+      <path value="$PROJECT_DIR$/backend/vendor/phar-io/version" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpunit/php-code-coverage" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpunit/php-file-iterator" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpunit/php-invoker" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpunit/php-text-template" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpunit/php-timer" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpunit/phpunit" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/console" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/css-selector" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/deprecation-contracts" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/error-handler" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/event-dispatcher" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/event-dispatcher-contracts" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/finder" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/http-foundation" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/http-kernel" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/mailer" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/mime" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-ctype" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-intl-grapheme" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-intl-idn" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-intl-normalizer" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-mbstring" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-php80" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-php83" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-uuid" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/process" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/routing" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/service-contracts" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/string" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/translation" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/translation-contracts" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/uid" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/var-dumper" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/backend/vendor/theseer/tokenizer" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/inflector" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/instantiator" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/lexer" />
+      <path value="$PROJECT_DIR$/backend/vendor/fakerphp/faker" />
+      <path value="$PROJECT_DIR$/backend/vendor/hamcrest/hamcrest-php" />
+      <path value="$PROJECT_DIR$/backend/vendor/carbonphp/carbon-doctrine-types" />
+      <path value="$PROJECT_DIR$/backend/vendor/fruitcake/php-cors" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpoption/phpoption" />
+      <path value="$PROJECT_DIR$/backend/vendor/ralouphie/getallheaders" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/cli-parser" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/code-unit" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/code-unit-reverse-lookup" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/comparator" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/complexity" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/diff" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/environment" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/exporter" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/global-state" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/lines-of-code" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/object-enumerator" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/object-reflector" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/recursion-context" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/resource-operations" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/type" />
+      <path value="$PROJECT_DIR$/backend/vendor/sebastian/version" />
+      <path value="$PROJECT_DIR$/backend/vendor/guzzlehttp/guzzle" />
+      <path value="$PROJECT_DIR$/backend/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/backend/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/backend/vendor/guzzlehttp/uri-template" />
+      <path value="$PROJECT_DIR$/backend/vendor/nunomaduro/collision" />
+      <path value="$PROJECT_DIR$/backend/vendor/nunomaduro/termwind" />
+      <path value="$PROJECT_DIR$/backend/vendor/tijsverkoyen/css-to-inline-styles" />
+      <path value="$PROJECT_DIR$/backend/vendor/dragonmantank/cron-expression" />
+      <path value="$PROJECT_DIR$/backend/vendor/graham-campbell/result-type" />
+      <path value="$PROJECT_DIR$/backend/vendor/composer" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/clock" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/event-dispatcher" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/http-client" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/http-factory" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/simple-cache" />
+      <path value="$PROJECT_DIR$/backend/vendor/psy/psysh" />
+      <path value="$PROJECT_DIR$/backend/vendor/filp/whoops" />
+      <path value="$PROJECT_DIR$/backend/vendor/voku/portable-ascii" />
+      <path value="$PROJECT_DIR$/backend/vendor/brick/math" />
+      <path value="$PROJECT_DIR$/backend/vendor/nette/schema" />
     </include_path>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -186,13 +373,15 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;arborescence-test&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/tclem/Documents/GLEI/images&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.webide.settings.project.settings.php&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -200,6 +389,12 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tclem\Documents\GLEI\images" />
     </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Main" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
+      <TestRunner configuration_file="$PROJECT_DIR$/backend/phpunit.xml" scope="XML" use_alternative_configuration_file="true" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -218,11 +413,24 @@
       <updated>1776066493503</updated>
       <workItem from="1776066494434" duration="5013000" />
       <workItem from="1776669688267" duration="141000" />
+      <workItem from="1777279963163" duration="642000" />
+      <workItem from="1777297793266" duration="629000" />
+      <workItem from="1777298469389" duration="1877000" />
+      <workItem from="1777300381241" duration="1005000" />
+      <workItem from="1777301600555" duration="799000" />
+      <workItem from="1777302426445" duration="2144000" />
+      <workItem from="1777317167674" duration="5020000" />
+      <workItem from="1777323704154" duration="1609000" />
+      <workItem from="1777325340376" duration="21000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
