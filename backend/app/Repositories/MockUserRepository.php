@@ -39,26 +39,12 @@ class MockUSerRepository implements UserRepositoryInterface
 
     public function findByEmail(string $email): ?User
     {
-        $userData = collect($this->users)->firstWhere('email', $email);
-
-        if (!$userData)
-        {
-            return null;
-        }
-
-        return $this->hydrate($userData);
+        return User::where('email', $email)->first();
     }
 
-    public function findById(string $id): ?User
+    public function findById(int $id): ?User
     {
-        $userData = collect($this->users)->firstWhere('id', $id);
-
-        if (!$userData)
-        {
-            return null;
-        }
-
-        return $this->hydrate($userData);
+        return User::find($id);
     }
 
     private function hydrate(array $data): User

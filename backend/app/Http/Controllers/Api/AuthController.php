@@ -86,19 +86,34 @@ class AuthController extends Controller
      */
     public function user(Request $request): JsonResponse
     {
-        Log::info('User endpoint hit', [
-            'has_user' => $request->user() !== null,
-            'user_id' => $request->user()?->id,
+        Log::info('=== User Endpoint Debug ===');
+        Log::info('Headers:', $request->headers->all());
+        Log::info('Authorization header:', [$request->header('Authorization')]);
+        Log::info('Bearer token:', [$request->bearerToken()]);
+        Log::info('Auth check:', [
+            'is_authenticated' => auth('sanctum')->check(),
+            'user_id' => auth('sanctum')->id(),
         ]);
+
+        // Try to get user TODO remove debug
+        $user = $request->user();
+        Log::info('Request user:', ['user' => $user]);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No user found - token invalid or missing',
+            ], 401);
+        }
 
         return response()->json([
             'success' => true,
             'data' => [
                 'user' => [
-                    'id' => $request->get('id'),
-                    'name' => $request->get('name'),
-                    'email' => $request->get('email'),
-                    'role' => $request->get('role'),
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
                 ],
             ],
         ], 200);

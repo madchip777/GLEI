@@ -2,8 +2,10 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Support\Facades\Log;
 
 class Handler extends ExceptionHandler
 {
@@ -44,7 +46,25 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            $this->reportable(function (Throwable $e) {
+                // Log the exception or perform any other reporting logic here
+                // For example, you can log the exception message and stack trace
+                Log::error($e->getMessage(), ['exception' => $e]);
+            });
         });
+    }
+
+    /**
+     * Convert an authentication into a response.
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        // For API requests, return JSON
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // For web requests, redirect to login
+        return redirect()->guest(route('login'));
     }
 }

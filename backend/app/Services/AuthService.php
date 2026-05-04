@@ -47,7 +47,7 @@ class AuthService
     /**
      * Logout user (revoke tokens)
      */
-    public function logout(USer $user): void
+    public function logout(User $user): void
     {
         $user->tokens()->delete();
 
