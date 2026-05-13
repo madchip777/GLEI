@@ -449,5 +449,4 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
-.idea/workspace.xml
-/.idea
+.idea/*
