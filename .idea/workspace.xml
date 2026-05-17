@@ -5,73 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="76954999-4419-4767-8a64-6b0cab72e9a3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/backend/app/Http/Controllers/Api/AuthController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/Repositories/Interfaces/UserRepositoryInterface.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/Repositories/MockUserRepository.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/Services/AuthService.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/GLEI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/GLEI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/PrivateRoute.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/contexts/AuthContext.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/Login.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/SuperAdminDashboard.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/services/api.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/DB_fil_rouge.drawio" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/FakeLogo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/Grille évaluation.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/ListeOrgaInteractionEtPage.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/PROJET FIL ROUGE GLOBAL.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/ReadmeDOCS.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DOCS/ShemaInfraTheo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/api.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/config.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/upload.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/.editorconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/.env.example" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/app/Http/Controllers/Controller.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/app/Models/User.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/app/Providers/AppServiceProvider.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/artisan" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/app.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/cache/packages.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/cache/services.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/bootstrap/providers.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/composer.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/composer.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/app.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/auth.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/cache.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/database.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/filesystems.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/logging.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/mail.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/queue.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/services.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/config/session.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/database/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/database/factories/UserFactory.php" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/factories/UserFactory.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/database/migrations/0001_01_01_000000_create_users_table.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/database/migrations/0001_01_01_000001_create_messages_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/migrations/0001_01_01_000001_create_messages_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/database/migrations/0001_01_01_000002_create_tickets_table.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/database/seeders/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/images/database/seeders/DatabaseSeeder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/phpunit.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/routes/console.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/routes/web.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/app/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/app/private/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/app/public/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/cache/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/cache/data/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/sessions/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/testing/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/storage/framework/views/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/tests/Feature/ExampleTest.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/tests/Pest.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/tests/TestCase.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/tests/Unit/ExampleTest.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glei_backend/vite.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/config/cors.php" beforeDir="false" afterPath="$PROJECT_DIR$/backend/config/cors.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/index.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/upload_handler.php" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,11 +35,16 @@
       <entry key="_C:/Users/tclem/Documents/GLEI" value="3CII7ioDNxYib8CyxtuqjVmIuGw" />
     </persistenceIdMap>
   </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="173" />
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="HTML File" />
         <option value="PHP File" />
+        <option value="JavaScript File" />
+        <option value="JSX File" />
       </list>
     </option>
   </component>
@@ -373,8 +324,11 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;arborescence-test&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tclem/Documents/GLEI/images&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tclem/Documents/GLEI&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -382,12 +336,17 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;reference.webide.settings.project.settings.php&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\tclem\\AppData\\Local\\Programs\\WebStorm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tclem\Documents\GLEI\images" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\tclem\Documents\GLEI\frontend\src\styles" />
     </key>
   </component>
   <component name="RunManager">
@@ -422,6 +381,14 @@
       <workItem from="1777317167674" duration="5020000" />
       <workItem from="1777323704154" duration="1609000" />
       <workItem from="1777325340376" duration="21000" />
+      <workItem from="1777368845890" duration="1587000" />
+      <workItem from="1777409430422" duration="267000" />
+      <workItem from="1777409717931" duration="3034000" />
+      <workItem from="1777926869038" duration="2634000" />
+      <workItem from="1778088999912" duration="123000" />
+      <workItem from="1778673788652" duration="999000" />
+      <workItem from="1778674832231" duration="1563000" />
+      <workItem from="1779037460480" duration="2499000" />
     </task>
     <servers />
   </component>
