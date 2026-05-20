@@ -16,19 +16,19 @@ use App\Http\Controllers\Api\SuperAdminController;
 /**
  * === Public Routes (no authentification required) ===
  */
-Route::post('login', [AuthController::class, 'login']);
-
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/refresh', [AuthController::class, 'refresh']);
 
 /**
  * === Protected Routes (authentification required) ===
  */
 Route::middleware('auth:sanctum')->group(function () {
     // --- Auth endpoints ---
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
 
     // --- User dashboard (accessible by all authenticated users) ---
-    Route::get('dashboard', [UserDashboardController::class, 'dashboard']);
+    Route::get('/dashboard', [UserDashboardController::class, 'dashboard']);
 
     // --- Admin routes (accessible by admin and super_admin) ---
     Route::middleware('role:admin,super_admin')->prefix('admin')->group(function () {

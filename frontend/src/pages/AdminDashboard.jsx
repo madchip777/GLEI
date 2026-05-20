@@ -4,13 +4,15 @@ import { dashboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 
 const AdminDashboard = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
+        if (authLoading) return;
+
         const fetchData = async () => {
             try {
                 const [dashboardResponse, usersResponse] = await Promise.all([
@@ -29,9 +31,9 @@ const AdminDashboard = () => {
         };
 
         fetchData();
-    }, []);
+    }, [authLoading]);
 
-    if (loading) {
+    if ( authLoading || loading) {
         return (
             <>
                 <Navbar />

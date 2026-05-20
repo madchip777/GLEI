@@ -24,6 +24,13 @@ const Login = () => {
 
         const result = await login(email, password);
 
+        console.log('🔍 Login result:', result);
+        console.log('🔍 SessionStorage after login:', {
+            access_token: sessionStorage.getItem('access_token'),
+            refresh_token: sessionStorage.getItem('refresh_token'),
+            user: sessionStorage.getItem('user')
+        });
+
         if (result.success) {
             navigate('/dashboard');
         } else {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\RefreshToken;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +30,12 @@ class AuthService
             ]);
         }
 
+        // Create access token (expires in 15 minutes)
+        $accessToken = $user->createToken('access-token', ['*'], now()->addMinutes(15))->plainTextToken;
+
+        // Create refresh token (expires in 7 days)
+        $refreshToken = RefreshToken::generate($user);
+
         $token =$user->createToken('auth-token')->plainTextToken;
 
         Log::info('User logged in', [
@@ -40,7 +47,42 @@ class AuthService
 
         return [
             'user' => $user,
-            'token' => $token,
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken->token,
+            'expires_in' => 900, // 15 minutes in seconds
+        ];
+    }
+
+    /**
+     * Refresh access token using refresh token
+     */
+    public function refresh(string $refreshTokenString): array
+    {
+        $refreshToken = RefreshToken::verify($refreshTokenString);
+
+        if (!$refreshToken) {
+            throw ValidationException::withMessages([
+                'refresh_token' => ['Invalid or expired refresh token.'],
+            ]);
+        }
+
+        $user = $refreshToken->user;
+
+        // Revoke old access tokens
+        $user->tokens()->delete();
+
+        // Create new access token
+        $accessToken = $user->createToken('access-token', ['*'], now()->addMinutes(15))->plainTextToken;
+
+        Log::info('Token refreshed', [
+            'user_id' => $user->id,
+            'ip' => request()->ip(),
+        ]);
+
+        return [
+            'user' => $user,
+            'access_token' => $accessToken,
+            'expires_in' => 900,
         ];
     }
 

@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { dashboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import {useAuth} from "../contexts/AuthContext.jsx";
 
 const SuperAdminDashboard = () => {
+    const { user, loading: authLoading } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [systemConfig, setSystemConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
+        if (authLoading) return;
+
         const fetchData = async () => {
             try {
                 const [dashboardResponse, configResponse] = await Promise.all([
@@ -27,9 +31,9 @@ const SuperAdminDashboard = () => {
         };
 
         fetchData();
-    }, []);
+    }, [authLoading]);
 
-    if (loading) {
+    if (authLoading || loading) {
         return (
             <>
                 <Navbar />

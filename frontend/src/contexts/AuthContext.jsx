@@ -1,29 +1,35 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import { authAPI } from "../services/api.js";
+import { authAPI } from "../services/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
+    const [accessToken, setAccessToken] = useState(null);
+    const [refreshToken, setRefreshToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const initializeAuth = () => {
             try {
-                const storedToken = sessionStorage.getItem('auth_token');
+                const storedAccessToken = sessionStorage.getItem("access_token");
+                const storedRefreshToken = sessionStorage.getItem("refresh_token");
                 const storedUser = sessionStorage.getItem('user');
 
-                console.log('Initializing auth:', { storedToken, storedUser }); // Debug log
+                console.log('Initializing auth:', {
+                    storedAccessToken,
+                    storedRefreshToken,
+                    storedUser
+                }); // Debug log
 
-                if (storedToken && storedUser) {
-                    setToken(storedToken);
+                if (storedAccessToken && storedRefreshToken && storedUser) {
+                    setAccessToken(storedAccessToken);
+                    setRefreshToken(storedRefreshToken);
                     setUser(JSON.parse(storedUser));
                 }
             } catch (error) {
                 console.error('Error initializing auth:', error);
-                sessionStorage.removeItem('auth_token');
-                sessionStorage.removeItem('user');
+                sessionStorage.clear();
             } finally {
                 setLoading(false);
             }
@@ -38,23 +44,36 @@ export const AuthProvider = ({ children }) => {
             const response = await authAPI.login(email, password);
 
             if (response.data.success) {
-                const { token, user } = response.data.data;
+                const { access_token, refresh_token, user } = response.data.data;
 
-                console.log('Login successful:', { token, user }); // Debug log
-
-                setToken(token);
-                setUser(user);
-
-                sessionStorage.setItem("auth_token", token);
-                sessionStorage.setItem("user", JSON.stringify(user));
-
-                console.log('Stored in sessionStorage:', {
-                    token: sessionStorage.getItem('auth_token'),
-                    user: sessionStorage.getItem('user')
+                console.log('Login successful:', {
+                    access_token: access_token.substring(0, 15) + '...',
+                    refresh_token: refresh_token.substring(0, 15) + '...',
+                    user: user
                 }); // Debug log
 
-                return{ success: true };
+                setAccessToken(access_token);
+                setRefreshToken(refresh_token);
+                setUser(user);
+
+                sessionStorage.setItem('access_token', access_token);
+                sessionStorage.setItem('refresh_token', refresh_token);
+                sessionStorage.setItem("user", JSON.stringify(user));
+
+                console.log('🔍 Stored in sessionStorage:', {
+                    access_token: sessionStorage.getItem('access_token'),
+                    refresh_token: sessionStorage.getItem('refresh_token'),
+                    user: sessionStorage.getItem('user')
+                });
+
+                return { success: true };
             }
+
+            return {
+                success: false,
+                message: response.data.message || 'Login failed',
+            };
+
         } catch (error) {
             console.error('Login error:', error);
             return {
@@ -71,14 +90,14 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            setToken(null);
+            setAccessToken(null);
+            setRefreshToken(null);
             setUser(null);
-            sessionStorage.removeItem("auth_token");
-            sessionStorage.removeItem("user");
+            sessionStorage.clear();
         }
     };
 
-    // Chack if user has specific role
+    // Check if user has specific role
     const hasRole = (roles) => {
         if (!user) return false;
         if (Array.isArray(roles)) {
@@ -89,11 +108,12 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
-        token,
+        accessToken,
+        refreshToken,
         loading,
         login,
         logout,
-        isAuthenticated: !!token,
+        isAuthenticated: !!accessToken || !!sessionStorage.getItem('access_token'),
         hasRole,
     };
 

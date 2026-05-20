@@ -42,7 +42,10 @@ class AuthController extends Controller
                         'email' => $result['user']->email,
                         'role' => $result['user']->role,
                     ],
-                    'token' => $result['token'],
+                    'access_token' => $result['access_token'],
+                    'refresh_token' => $result['refresh_token'],
+                    'token_type' => 'Bearer',
+                    'expires_in' => $result['expires_in'],
                 ],
             ], 200);
         } catch (ValidationException $exception) {
@@ -55,6 +58,48 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur inattendue lors de la connexion : ' . $exception->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Refresh token endpoint
+     * POST /api/refresh
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'refresh_token' => 'required|string',
+        ]);
+
+        try {
+            $result = $this->authService->refresh($validated['refresh_token']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token refreshed successfully',
+                'data' => [
+                    'user' => [
+                        'id' => $result['user']->id,
+                        'name' => $result['user']->name,
+                        'email' => $result['user']->email,
+                        'role' => $result['user']->role,
+                    ],
+                    'access_token' => $result['access_token'],
+                    'token_type' => 'Bearer',
+                    'expires_in' => $result['expires_in'],
+                ],
+            ], 200);
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid refresh token',
+                'errors' => $exception->errors(),
+            ], 401);
+        } catch (\Exception $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error refreshing token',
             ], 500);
         }
     }

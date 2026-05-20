@@ -4,12 +4,23 @@ import { dashboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
+        if (authLoading) return;
+
+        console.log('🔍 Dashboard Debug:', {
+            authLoading,
+            sessionStorage: {
+                access_token: sessionStorage.getItem('access_token'),
+                refresh_token: sessionStorage.getItem('refresh_token'),
+                user: sessionStorage.getItem('user')
+            }
+        });
+
         const fetchDashboard = async () => {
             try {
                 const response = await dashboardAPI.getUserDashboard();
@@ -23,9 +34,9 @@ const Dashboard = () => {
         };
 
         fetchDashboard();
-    }, []);
+    }, [authLoading]);
 
-    if (loading) {
+    if (authLoading || loading) {
         return (
             <>
                 <Navbar />
