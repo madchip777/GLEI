@@ -46,7 +46,7 @@ return [
     |
     */
 
-    'expiration' => 15, // minutes,
+    'expiration' => 15, // 15 minutes,
 
     'token_prefix' => '',
 

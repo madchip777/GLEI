@@ -48,7 +48,7 @@ class AuthService
         return [
             'user' => $user,
             'access_token' => $accessToken,
-            'refresh_token' => $refreshToken->token,
+            'refresh_token' => $refreshToken->plain_token,
             'expires_in' => 900, // 15 minutes in seconds
         ];
     }

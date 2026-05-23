@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class AuthController extends Controller
 {
     public function __construct(
-        private AuthService $authService
+        private readonly AuthService $authService
     ) {}
 
     /**
@@ -68,6 +68,11 @@ class AuthController extends Controller
      */
     public function refresh(Request $request): JsonResponse
     {
+        Log::info('Refresh endpoint hit', [
+            'has_refresh_token' => $request->has('refresh_token'),
+            'refresh_token' => $request->input('refresh_token') ? substr($request->input('refresh_token'), 0, 20) . '...' : null,
+        ]);
+
         $validated = $request->validate([
             'refresh_token' => 'required|string',
         ]);

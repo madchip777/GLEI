@@ -3,7 +3,7 @@ import axios from 'axios';
 // Base API configuration
 const api = axios.create({
     baseURL: 'http://localhost:8000/api',
-    handlers: {
+    headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     },
@@ -62,28 +62,33 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             isRefreshing = true;
 
-            const refreshToken = sessionStorage.getItem('refresh_token');
-
-            if (!refreshToken) {
-                // No refresh token -> logout
-                sessionStorage.clear();
-                window.location.href = '/login';
-                return Promise.reject(error);
-            }
-
             try {
+                const refreshToken = sessionStorage.getItem('refresh_token');
+
+                console.log('🔄 Attempting token refresh with:', {
+                    refreshToken: refreshToken?.substring(0, 20) + '...',
+                    hasRefreshToken: !!refreshToken
+                });
+
+                if (!refreshToken) {
+                    // No refresh token -> logout
+                    sessionStorage.clear();
+                    window.location.href = '/login';
+                    return Promise.reject(error);
+                }
+
                 const response = await axios.post('http://localhost:8000/api/refresh', {
                     refresh_token: refreshToken,
                 });
 
                 if (response.data.success) {
-                    const { access_token, user } = response.data.success;
+                    const { access_token, user } = response.data.data;
 
                     sessionStorage.setItem('access_token', access_token);
                     sessionStorage.setItem('user', JSON.stringify(user));
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-                    originalRequest.headers.Authorization = `Bearer ${access_token}`;
+                    originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
 
                     console.log('Token refreshed successfully');
 

@@ -44,11 +44,17 @@ class RefreshToken extends Model
         // Delete old refresh tokens for this user
         self::where('user_id', $user->id)->delete();
 
-        return self::create([
+        $plainToken = Str::random(60);
+
+        $refreshToken = self::create([
             'user_id' => $user->id,
-            'token' => hash('sha256', Str::random(60)),
-            'expires_at' => now()->addDays(7), // 7 days
+            'token' => hash('sha256', $plainToken),
+            'expires_at' => now()->addDays(7),
         ]);
+
+        $refreshToken->plain_token = $plainToken;
+
+        return $refreshToken;
     }
 
     /**
