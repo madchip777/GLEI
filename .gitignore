@@ -452,3 +452,5 @@ auth.json
 .idea/workspace.xml
 /.idea
 database/database.sqlite
+/postman/
+/.postman/
