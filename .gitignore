@@ -450,7 +450,6 @@ Homestead.json
 .phpactor.json
 auth.json
 .idea/workspace.xml
-/.idea
 database/database.sqlite
-/postman/
-/.postman/
+/postman/*
+/.postman/*
