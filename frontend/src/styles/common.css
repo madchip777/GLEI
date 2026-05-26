@@ -1,0 +1,199 @@
+/* =====================================
+    Common Styles shared across the app
+   ===================================== */
+
+/* === Layout === */
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* === Cards === */
+.card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    color: #34495e;
+    margin-bottom: 1rem;
+}
+
+/* === Loading States === */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: #2c3e50;
+}
+
+.loading-text {
+    padding: 2rem;
+    text-align: center;
+}
+
+/* === Error Messages === */
+.error-container {
+    padding: 2rem;
+    text-align: center;
+    color: #e74c3c;
+}
+
+.error-alert {
+    background-color: #fee;
+    color: #c33;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* === Access Denied === */
+.access-denied {
+    padding: 20px;
+    text-align: center;
+}
+
+.access-denied h2 {
+    color: #e74c3c;
+    margin-bottom: 1rem;
+}
+
+/* === Badges === */
+.badge {
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.badge-primary {
+    background-color: #3498db;
+}
+
+.badge-danger {
+    background-color: #e74c3c;
+}
+
+.badge-warning {
+    background-color: #f39c12;
+}
+
+.badge-success {
+    background-color: #27ae60;
+}
+
+.badge-purple {
+    background-color: #9b59b6;
+}
+
+.badge-teal {
+    background-color: #1abc9c;
+}
+
+.badge-dark {
+    background-color: #34495e;
+}
+
+/* === Grid Layouts === */
+.grid-auto {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-gap {
+    display: grid;
+    gap: 1rem;
+}
+
+/* === Stat Cards === */
+.stat-card {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.stat-card-value {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* === Tables === */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead tr {
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    color: #7f8c8d;
+    font-weight: 600;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.data-table td {
+    padding: 1rem;
+}
+
+/* === List Items === */
+.list-item {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-item-title {
+    margin: 0;
+    font-weight: bold;
+}
+
+/* === Settings Panel === */
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.settings-key {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.settings-value {
+    color: #7f8c8d;
+}

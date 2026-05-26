@@ -2,24 +2,31 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { dashboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import '../styles/dashboard.css';
+import '../styles/common.css';
 
+/**
+ * Dashboard Component
+ *
+ * Main user dashboard displaying user information and tickets.
+ * Accessible to all authenticated users regardless of role.
+ *
+ * @returns {React.JSX.Element}
+ * @component
+ */
 const Dashboard = () => {
     const { user, loading: authLoading } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    /**
+     * Fetch dashboard data from API
+     * Waits for auth initialization to complete
+     */
     useEffect(() => {
+        // Don't fetch if auth is still loading
         if (authLoading) return;
-
-        console.log('🔍 Dashboard Debug:', {
-            authLoading,
-            sessionStorage: {
-                access_token: sessionStorage.getItem('access_token'),
-                refresh_token: sessionStorage.getItem('refresh_token'),
-                user: sessionStorage.getItem('user')
-            }
-        });
 
         const fetchDashboard = async () => {
             try {
@@ -36,11 +43,12 @@ const Dashboard = () => {
         fetchDashboard();
     }, [authLoading]);
 
+    // Show loading state
     if (authLoading || loading) {
         return (
             <>
                 <Navbar />
-                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <div className="loading-text">
                     <p>Chargement...</p>
                 </div>
             </>
@@ -51,7 +59,7 @@ const Dashboard = () => {
         return (
             <>
                 <Navbar />
-                <div style={{ padding: '2rem', textAlign: 'center', color: '#e74c3c' }}>
+                <div className="error-container">
                     <p>{error}</p>
                 </div>
             </>
@@ -61,75 +69,51 @@ const Dashboard = () => {
     return (
         <>
             <Navbar />
-            <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-                <h1 style={{ color: '#2c3e50', marginBottom: '2rem' }}>
+            <div className="dashboard-container">
+                <h1 className="dashboard-title">
                     Tableau de bord - {user?.name}
                 </h1>
 
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '2rem',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    marginBottom: '2rem',
-                }}>
-                    <h2 style={{ color: '#34495e', marginBottom: '1rem' }}>
-                        Informations utilisateur
-                    </h2>
-                    <p><strong>Nom:</strong> {dashboardData?.user?.name}</p>
-                    <p><strong>Email:</strong> {dashboardData?.user?.email}</p>
-                    <p><strong>Rôle:</strong> <span style={{
-                        backgroundColor: '#3498db',
-                        color: 'white',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '0.9rem',
-                    }}>{dashboardData?.user?.role}</span></p>
+                {/* User Information Section */}
+                <div className="info-section">
+                    <h2 className="card-header">Informations utilisateur</h2>
+                    <div className="info-item">
+                        <span className="info-label">Nom:</span> {dashboardData?.user?.name}
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">Email:</span> {dashboardData?.user?.email}
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">Rôle:</span>{' '}
+                        <span className="badge badge-primary">
+                            {dashboardData?.user?.role}
+                        </span>
+                    </div>
                 </div>
 
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '2rem',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                }}>
-                    <h2 style={{ color: '#34495e', marginBottom: '1rem' }}>
-                        Mes tickets
-                    </h2>
+                {/* Tickets Section */}
+                <div className="tickets-section">
+                    <h2 className="card-header">Mes tickets</h2>
 
                     {dashboardData?.my_tickets?.length > 0 ? (
-                        <div style={{ display: 'grid', gap: '1rem' }}>
+                        <div className="grid-gap">
                             {dashboardData.my_tickets.map((ticket) => (
-                                <div
-                                    key={ticket.id}
-                                    style={{
-                                        border: '1px solid #ddd',
-                                        padding: '1rem',
-                                        borderRadius: '4px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}
-                                >
+                                <div key={ticket.id} className="list-item">
                                     <div>
-                                        <p style={{ margin: 0, fontWeight: 'bold' }}>
+                                        <p className="list-item-title">
                                             #{ticket.id} - {ticket.title}
                                         </p>
                                     </div>
-                                    <span style={{
-                                        backgroundColor: ticket.status === 'ouvert' ? '#e74c3c' : '#f39c12',
-                                        color: 'white',
-                                        padding: '0.25rem 0.75rem',
-                                        borderRadius: '12px',
-                                        fontSize: '0.85rem',
-                                    }}>
-                    {ticket.status}
-                  </span>
+                                    <span className={`badge ${
+                                        ticket.status === 'ouvert' ? 'badge-danger' : 'badge-warning'
+                                    }`}>
+                                        {ticket.status}
+                                    </span>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p style={{ color: '#7f8c8d' }}>Aucun ticket pour le moment</p>
+                        <p className="tickets-empty">Aucun ticket pour le moment</p>
                     )}
                 </div>
             </div>

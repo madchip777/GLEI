@@ -9,6 +9,18 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Authentication Controller
+ *
+ * Handles HTTP request for authentication endpoints.
+ * All methods return standardized JSON responses.
+ *
+ * Endpoints:
+ * - POST /api/login - User authentication
+ * - POST /api/refresh - Token refresh
+ * - POST /api/logout - User logout (require auth)
+ * - GET /api/user - Get current user (require auth)
+ */
 class AuthController extends Controller
 {
     public function __construct(

@@ -1,14 +1,35 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { authAPI } from "../services/api";
 
+/**
+ * Authentication Context
+ *
+ * Provides authentication state and methods throughout the application.
+ * Manages user session, tokens (access & refresh), and role-based access.
+ *
+ * State stored in sessionStorage for security (cleared on browser close).
+ */
 const AuthContext = createContext(null);
 
+/**
+ * AuthProvider Component
+ *
+ * Wraps the application to provide authentication context.
+ * Handles token management, login/logout, and session persistence.
+ *
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Child components
+ */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [accessToken, setAccessToken] = useState(null);
     const [refreshToken, setRefreshToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    /**
+     * Initialize authentication state from sessionStorage
+     * Runs once on mount to restore session after page refresh
+     */
     useEffect(() => {
         const initializeAuth = () => {
             try {
@@ -17,10 +38,10 @@ export const AuthProvider = ({ children }) => {
                 const storedUser = sessionStorage.getItem('user');
 
                 console.log('Initializing auth:', {
-                    storedAccessToken,
-                    storedRefreshToken,
-                    storedUser
-                }); // Debug log
+                    hasAccessToken: !!storedAccessToken,
+                    hasRefreshToken: !!storedRefreshToken,
+                    hasUser: !!storedUser
+                });
 
                 if (storedAccessToken && storedRefreshToken && storedUser) {
                     setAccessToken(storedAccessToken);
@@ -38,7 +59,16 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, []);
 
-    // Login function
+    /**
+     * Login user with email and password
+     *
+     * Authenticates user and stores tokens in both states and sessionStorage.
+     * Returns access token, refresh token, and user info.
+     *
+     * @param {string} email - USer email address
+     * @param {string} password - User password
+     * @returns {Promise<{success: boolean, massage?: string}>}
+     */
     const login = async (email, password) => {
         try {
             const response = await authAPI.login(email, password);
@@ -50,12 +80,14 @@ export const AuthProvider = ({ children }) => {
                     access_token: access_token.substring(0, 15) + '...',
                     refresh_token: refresh_token.substring(0, 15) + '...',
                     user: user
-                }); // Debug log
+                });
 
+                // Update state
                 setAccessToken(access_token);
                 setRefreshToken(refresh_token);
                 setUser(user);
 
+                // Persist to sessionStorage (cleared on browser close)
                 sessionStorage.setItem('access_token', access_token);
                 sessionStorage.setItem('refresh_token', refresh_token);
                 sessionStorage.setItem("user", JSON.stringify(user));
@@ -83,13 +115,19 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Logout function
+    /**
+     * Logout user
+     *
+     * Revokes tokens on backend and clears local session.
+     * Always clears local data even if API call fails.
+     */
     const logout = async () => {
         try {
             await authAPI.logout();
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
+            // Clear everything regardless of API call success
             setAccessToken(null);
             setRefreshToken(null);
             setUser(null);
@@ -97,7 +135,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Check if user has specific role
+    /**
+     * Chack if user has specific role(s)
+     *
+     * @param {string|string[]} roles - Role or array of roles to check
+     * @returns {boolean} True if user has one of the specified roles
+     */
     const hasRole = (roles) => {
         if (!user) return false;
         if (Array.isArray(roles)) {
@@ -106,6 +149,10 @@ export const AuthProvider = ({ children }) => {
         return user.role === roles;
     };
 
+    /**
+     * Context value provided to children
+     * Includes auth state and methods.
+     */
     const value = {
         user,
         accessToken,
@@ -120,7 +167,18 @@ export const AuthProvider = ({ children }) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use auth context
+/**
+ * useAuth Hook
+ *
+ * Custom hook to access authentication context.
+ * Must be used within AuthProvider.
+ *
+ * @returns {Object} Authentication context value
+ * @throws {Error} If used outside AuthProvider
+ *
+ * @example
+ * const { user, login, logout, isAuthenticated } = useAuth();
+ */
 export const  useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {

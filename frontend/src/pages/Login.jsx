@@ -1,7 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import '../styles/auth.css'
 
+/**
+ * Login Component
+ *
+ * Handles user authentification wih email and password.
+ * Supports three user roles: user, admin and super_admin.
+ * Automatically redirects authenticated users to dashboard.
+ *
+ * @returns {React.JSX.Element}
+ * @component
+ */
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -11,25 +22,26 @@ const Login = () => {
     const { login, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
+    /**
+     * Redirects to dashboard if user is already authenticated
+     */
     useEffect(() => {
         if (isAuthenticated) {
             navigate('/dashboard', { replace: true });
         }
     }, [isAuthenticated, navigate]);
 
+    /**
+     * Handle login form submission
+     *
+     * @param {Event} e - Form submission event
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
         const result = await login(email, password);
-
-        console.log('🔍 Login result:', result);
-        console.log('🔍 SessionStorage after login:', {
-            access_token: sessionStorage.getItem('access_token'),
-            refresh_token: sessionStorage.getItem('refresh_token'),
-            user: sessionStorage.getItem('user')
-        });
 
         if (result.success) {
             navigate('/dashboard');
@@ -41,41 +53,21 @@ const Login = () => {
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '100vh',
-            backgroundColor: '#ecf0f1',
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '3rem',
-                borderRadius: '8px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                width: '100%',
-                maxWidth: '400px',
-            }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#2c3e50' }}>
+        <div className="auth-container">
+            <div className="auth-card">
+                <h2 className="auth-title">
                     Connexion
                 </h2>
 
                 {error && (
-                    <div style={{
-                        backgroundColor: '#fee',
-                        color: '#c33',
-                        padding: '1rem',
-                        borderRadius: '4px',
-                        marginBottom: '1rem',
-                        textAlign: 'center',
-                    }}>
+                    <div className="error-alert">
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#2c3e50' }}>
+                    <div className="form-group">
+                        <label className="form-label">
                             Email
                         </label>
                         <input
@@ -83,19 +75,13 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '1rem',
-                            }}
+                            className="form-input"
                             placeholder="admin@company.com"
                         />
                     </div>
 
-                    <div style={{ marginBottom: '2rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#2c3e50' }}>
+                    <div className="form-group-last">
+                        <label className="form-label">
                             Mot de passe
                         </label>
                         <input
@@ -103,47 +89,32 @@ const Login = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '1rem',
-                            }}
-                            placeholder="••••••••"
+                            className="form-input"
+                            placeholder="mot de passe"
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            backgroundColor: loading ? '#95a5a6' : '#3498db',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontSize: '1rem',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontWeight: 'bold',
-                        }}
+                        className="btn btn-primary"
                     >
                         {loading ? 'Connexion...' : 'Se connecter'}
                     </button>
                 </form>
 
-                <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-                    <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                {/* Test accounts for development/ demo */}
+                <div className="test-accounts">
+                    <p className="test-accounts-title">
                         Comptes de test:
                     </p>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.85rem' }}>
+                    <p className="test-account-item">
                         👤 User: user@company.com / password123
                     </p>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.85rem' }}>
+                    <p className="test-account-item">
                         🛡️ Admin: admin@company.com / password123
                     </p>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.85rem' }}>
+                    <p className="test-account-item">
                         ⚡ Super Admin: superadmin@company.com / password123
                     </p>
                 </div>

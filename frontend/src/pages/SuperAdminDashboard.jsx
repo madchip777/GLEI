@@ -1,16 +1,35 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from "../contexts/AuthContext.jsx";
 import { dashboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
-import {useAuth} from "../contexts/AuthContext.jsx";
+import '../styles/dashboard.css';
+import '../styles/common.css';
 
+/**
+ * SuperAdminDashboard Component
+ *
+ * Super administrator dashboard with system-wide statistics and configuration.
+ * Accessible to users with 'super_admin' role only.
+ * Displays:
+ * - System health metrics
+ * - Admin and user counts
+ * - System configuration settings
+ *
+ * @component
+ */
 const SuperAdminDashboard = () => {
-    const { user, loading: authLoading } = useAuth();
+    const { loading: authLoading } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [systemConfig, setSystemConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    /**
+     * Fetch super admin dashboard data and system configuration
+     * Makes parallel API calls for better performance
+     */
     useEffect(() => {
+        // Wait for auth initialization
         if (authLoading) return;
 
         const fetchData = async () => {
@@ -33,11 +52,12 @@ const SuperAdminDashboard = () => {
         fetchData();
     }, [authLoading]);
 
+    // Loading state
     if (authLoading || loading) {
         return (
             <>
                 <Navbar />
-                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <div className="loading-text">
                     <p>Chargement...</p>
                 </div>
             </>
@@ -48,7 +68,7 @@ const SuperAdminDashboard = () => {
         return (
             <>
                 <Navbar />
-                <div style={{ padding: '2rem', textAlign: 'center', color: '#e74c3c' }}>
+                <div className="error-container">
                     <p>{error}</p>
                 </div>
             </>
@@ -58,108 +78,62 @@ const SuperAdminDashboard = () => {
     return (
         <>
             <Navbar />
-            <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-                <h1 style={{ color: '#2c3e50', marginBottom: '2rem' }}>
-                    ⚡ Tableau de bord Super Administrateur
+            <div className="dashboard-container">
+                <h1 className="dashboard-subtitle">
+                    Tableau de bord Super Administrateur
                 </h1>
 
-                {/* System Stats */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '1.5rem',
-                    marginBottom: '2rem',
-                }}>
-                    <div style={{
-                        backgroundColor: '#9b59b6',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                            Total Admins
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                {/* System Statistics Cards Grid */}
+                <div className="stats-grid">
+                    {/* Total Admins Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#9b59b6' }}>
+                        <h3 className="stat-card-title">Total Admins</h3>
+                        <p className="stat-card-value">
                             {dashboardData?.system_stats?.total_admins || 0}
                         </p>
                     </div>
 
-                    <div style={{
-                        backgroundColor: '#1abc9c',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                            Total Utilisateurs
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                    {/* Total Users Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#1abc9c' }}>
+                        <h3 className="stat-card-title">Total Utilisateurs</h3>
+                        <p className="stat-card-value">
                             {dashboardData?.system_stats?.total_users || 0}
                         </p>
                     </div>
 
-                    <div style={{
-                        backgroundColor: '#27ae60',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                            Santé Système
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                    {/* System Health Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#27ae60' }}>
+                        <h3 className="stat-card-title">Santé Système</h3>
+                        <p className="stat-card-value">
                             {dashboardData?.system_stats?.system_health || 'OK'}
                         </p>
                     </div>
 
-                    <div style={{
-                        backgroundColor: '#34495e',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                            Uptime
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                    {/* System Uptime Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#34495e' }}>
+                        <h3 className="stat-card-title">Uptime</h3>
+                        <p className="stat-card-value">
                             {dashboardData?.system_stats?.uptime || 'N/A'}
                         </p>
                     </div>
                 </div>
 
-                {/* System Configuration */}
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '2rem',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                }}>
-                    <h2 style={{ color: '#34495e', marginBottom: '1.5rem' }}>
-                        Configuration Système
-                    </h2>
+                {/* System Configuration Section */}
+                <div className="card">
+                    <h2 className="card-header">Configuration Système</h2>
 
-                    <div style={{ display: 'grid', gap: '1rem' }}>
+                    <div className="grid-gap">
                         {systemConfig?.settings && Object.entries(systemConfig.settings).map(([key, value]) => (
-                            <div
-                                key={key}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    padding: '1rem',
-                                    backgroundColor: '#f8f9fa',
-                                    borderRadius: '4px',
-                                }}
-                            >
-                <span style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-                  {key.replace(/_/g, ' ').toUpperCase()}
-                </span>
-                                <span style={{ color: '#7f8c8d' }}>
-                  {typeof value === 'boolean' ? (value ? '✅ Activé' : '❌ Désactivé') : value}
-                </span>
+                            <div key={key} className="settings-item">
+                                <span className="settings-key">
+                                    {key.replace(/_/g, ' ').toUpperCase()}
+                                </span>
+                                <span className="settings-value">
+                                    {typeof value === 'boolean'
+                                        ? (value ? 'Activé' : 'Désactivé')
+                                        : value
+                                    }
+                                </span>
                             </div>
                         ))}
                     </div>

@@ -2,7 +2,21 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { dashboardAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import '../styles/dashboard.css';
+import '../styles/common.css'
 
+/**
+ * AdminDashboard Component
+ *
+ * Administrator dashboard with system statistics and user management.
+ * Accessible to users with 'admin' or 'super_admin' roles only.
+ * Displays:
+ * - System statistics (users, tickets, incidents)
+ * - User management table
+ *
+ * @returns {React.JSX.Element}
+ * @component
+ */
 const AdminDashboard = () => {
     const { user, loading: authLoading } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
@@ -10,7 +24,12 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    /**
+     * Fetch admin dashboard data and user list
+     * Makes parallel API calls for better performance
+     */
     useEffect(() => {
+        // Wait for auth initialization
         if (authLoading) return;
 
         const fetchData = async () => {
@@ -33,11 +52,12 @@ const AdminDashboard = () => {
         fetchData();
     }, [authLoading]);
 
+    // Loading state
     if ( authLoading || loading) {
         return (
             <>
                 <Navbar />
-                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <div className="loading-text">
                     <p>Chargement...</p>
                 </div>
             </>
@@ -48,7 +68,7 @@ const AdminDashboard = () => {
         return (
             <>
                 <Navbar />
-                <div style={{ padding: '2rem', textAlign: 'center', color: '#e74c3c' }}>
+                <div className="error-container">
                     <p>{error}</p>
                 </div>
             </>
@@ -58,98 +78,63 @@ const AdminDashboard = () => {
     return (
         <>
             <Navbar />
-            <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-                <h1 style={{ color: '#2c3e50', marginBottom: '2rem' }}>
-                    🛡️ Tableau de bord Administrateur
+            <div className="dashboard-container">
+                <h1 className="dashboard-subtitle">
+                    Tableau de bord Administrateur
                 </h1>
 
-                {/* Stats Cards */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '1.5rem',
-                    marginBottom: '2rem',
-                }}>
-                    <div style={{
-                        backgroundColor: '#3498db',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
+                {/* Statistics Cards Grid */}
+                <div className="stats-grid">
+                    {/* Total Users Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#3498db' }}>
+                        <h3 className="stat-card-title">
                             Total Utilisateurs
                         </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                        <p className="stat-card-value">
                             {dashboardData?.stats?.total_users || 0}
                         </p>
                     </div>
 
-                    <div style={{
-                        backgroundColor: '#e74c3c',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                            Tickets Actifs
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                    {/* Active Tickets Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#e74c3c' }}>
+                        <h3 className="stat-card-title">Tickets Actifs</h3>
+                        <p className="stat-card-value">
                             {dashboardData?.stats?.active_tickets || 0}
                         </p>
                     </div>
 
-                    <div style={{
-                        backgroundColor: '#f39c12',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', opacity: 0.9 }}>
-                            Incidents en Attente
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
+                    {/* Pending Incidents Stat */}
+                    <div className="stat-card" style={{ backgroundColor: '#f39c12' }}>
+                        <h3 className="stat-card-title">Incidents en Attente</h3>
+                        <p className="stat-card-value">
                             {dashboardData?.stats?.pending_incidents || 0}
                         </p>
                     </div>
                 </div>
 
-                {/* Users Table */}
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '2rem',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                }}>
-                    <h2 style={{ color: '#34495e', marginBottom: '1.5rem' }}>
-                        Gestion des utilisateurs
-                    </h2>
+                {/* Users Management section */}
+                <div className="card">
+                    <h2 className="card-header">Gestion des utilisateurs</h2>
 
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="data-table">
                         <thead>
-                        <tr style={{ borderBottom: '2px solid #ecf0f1' }}>
-                            <th style={{ padding: '1rem', textAlign: 'left', color: '#7f8c8d' }}>ID</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', color: '#7f8c8d' }}>Nom</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', color: '#7f8c8d' }}>Rôle</th>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Rôle</th>
                         </tr>
                         </thead>
                         <tbody>
                         {users.map((u) => (
-                            <tr key={u.id} style={{ borderBottom: '1px solid #ecf0f1' }}>
-                                <td style={{ padding: '1rem' }}>{u.id}</td>
-                                <td style={{ padding: '1rem' }}>{u.name}</td>
-                                <td style={{ padding: '1rem' }}>
-                    <span style={{
-                        backgroundColor: u.role === 'admin' ? '#e74c3c' : '#3498db',
-                        color: 'white',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '0.85rem',
-                    }}>
-                      {u.role}
-                    </span>
+                            <tr key={u.id}>
+                                <td>{u.id}</td>
+                                <td>{u.name}</td>
+                                <td>
+                                        <span className={`badge ${
+                                            u.role === 'admin' ? 'badge-danger' : 'badge-primary'
+                                        }`}>
+                                            {u.role}
+                                        </span>
                                 </td>
                             </tr>
                         ))}

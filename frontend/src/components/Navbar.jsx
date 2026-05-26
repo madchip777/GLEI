@@ -1,14 +1,26 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import '../styles/navbar.css'
 
+/**
+ * Navbar Component
+ *
+ * Top navigation bar with role-based link visibility.
+ * Displays user info and provides logout functionality.
+ *
+ * @returns {React.JSX.Element|null}
+ * @component
+ */
 const Navbar = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [tokenExpiry, setTokenExpiry] = useState(null);
 
-    // /!\ Debug
-
+    /**
+     * Calculate token expiry time (15 minutes from login)
+     * Note: In production, decode JWT to get actual expiry
+     */
     useEffect(() => {
         // Calculate token expiry (15 minutes from login)
         const accessToken = sessionStorage.getItem('access_token');
@@ -20,6 +32,9 @@ const Navbar = () => {
         }
     }, []);
 
+    /**
+     * Update countdown every second
+     */
     useEffect(() => {
         if (!tokenExpiry) return;
 
@@ -35,6 +50,11 @@ const Navbar = () => {
         return () => clearInterval(interval);
     }, [tokenExpiry]);
 
+    /**
+     * Calculate remaining time in MM:SS format
+     *
+     * @returns {string|null} Formatted time or null
+     */
     const getTimeLeft = () => {
         if (!tokenExpiry) return null;
         const now = new Date().getTime();
@@ -44,74 +64,63 @@ const Navbar = () => {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // /!\ Debug
-
+    /**
+     * Handle user logout
+     * Clears session and redirects to login page
+     */
     const handleLogout = async () => {
         await logout();
         navigate('/login');
     };
 
+    // Don't show navbar if user is not authenticated
     if (!isAuthenticated) {
         return null;
     }
 
     return (
-        <nav style={{
-            backgroundColor: '#2c3e50',
-            padding: '1rem 2rem',
-            color: 'white',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-        }}>
-            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        <nav className="navbar">
+            {/* Left section: brand and navigation links */}
+            <div className="navbar-left">
                 <h3 style={{ margin: 0 }}>GLEI App</h3>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <Link to="/dashboard" style={{ color: 'white', textDecoration: 'none' }}>
+                <div className="navbar-links">
+                    <Link to="/dashboard" className="navbar-link">
                         Dashboard
                     </Link>
 
-                    {user?.role === 'admin' || user?.role === 'super_admin' ? (
-                        <Link to="/admin" style={{ color: 'white', textDecoration: 'none' }}>
+                    {/* Admin link - visible to admin and super_admin */}
+                    {(user?.role === 'admin' || user?.role === 'super_admin') && (
+                        <Link to="/admin" className="navbar-link">
                             Admin
                         </Link>
-                    ) : null}
+                    )}
 
-                    {user?.role === 'super_admin' ? (
-                        <Link to="/super-admin" style={{ color: 'white', textDecoration: 'none' }}>
+                    {/* Super Admin link - visible to super_admin only */}
+                    {user?.role === 'super_admin' && (
+                        <Link to="/super-admin" className="navbar-link">
                             Super Admin
                         </Link>
-                    ) : null}
+                    )}
                 </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            {/* Right section: USer info and logout */}
+            <div className="navbar-right">
+                {/* Token expiration countdown */}
                 {tokenExpiry && (
-                    <span style={{
-                        fontSize: '0.85rem',
-                        opacity: 0.8,
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '4px'
-                    }}>
-            🔑           Token: {getTimeLeft()}
+                    <span className="navbar-token-timer">
+                        Token: {getTimeLeft()}
                     </span>
                 )}
-                <span>
-                  {user?.name} ({user?.role})
+
+                {/* User name and role */}
+                <span className="navbar-user">
+                    {user?.name} ({user?.role})
                 </span>
-                <button
-                    onClick={handleLogout}
-                    style={{
-                        backgroundColor: '#e74c3c',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                    }}
-                >
+
+                {/* Logout button */}
+                <button onClick={handleLogout} className="navbar-logout-btn">
                     Déconnexion
                 </button>
             </div>
