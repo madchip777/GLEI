@@ -18,32 +18,50 @@ use Illuminate\Support\Facades\Log;
  * Endpoints:
  * - POST /api/login - User authentication
  * - POST /api/refresh - Token refresh
- * - POST /api/logout - User logout (require auth)
- * - GET /api/user - Get current user (require auth)
+ * - POST /api/logout - User logout (requires auth)
+ * - GET /api/user - Get current user (requires auth)
  */
 class AuthController extends Controller
 {
-    public function __construct(
-        private readonly AuthService $authService
-    ) {}
+    /**
+     * Authentication service instance
+     *
+     * @var AuthService
+     */
+    private AuthService $authService;
 
     /**
-     * Login endpoint
-     * POST /api/login
+     * Constructor - Inject authentication service
+     *
+     * @param AuthService $authService
+     */
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
+    /**
+     * Login Endpoint
+     *
+     * Authenticates  user with email and password.
+     * Returns access token, refresh token, and user data.
      */
     public function login(Request $request): JsonResponse
     {
+        // Validate request input
         $validated = $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string|min:6',
         ]);
 
         try {
+            // Attempt authentication
             $result = $this->authService->login(
                 $validated['email'],
                 $validated['password']
             );
 
+            // return successes response with tokens
             return response()->json([
                 'success' => true,
                 'message' => 'Connexion réussie',
@@ -67,6 +85,11 @@ class AuthController extends Controller
                 'errors' => $exception->errors(),
             ], 422);
         } catch (\Exception $exception) {
+            // Unexpected error - log for debugging
+            Log::error('Login exception', [
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur inattendue lors de la connexion : ' . $exception->getMessage(),
@@ -75,8 +98,21 @@ class AuthController extends Controller
     }
 
     /**
-     * Refresh token endpoint
-     * POST /api/refresh
+     * Refresh token Endpoint
+     *
+     * Generates new access token using refresh token.
+     * Client sends refresh token, receives new access token.
+     * Refresh token remains valid (not rotated).
+     *
+     * @route POST /api/refresh
+     * @access Public (but requires valid refresh token)
+     *
+     * @param Request $request HTTP request with refresh_token
+     *
+     * @return JsonResponse
+     * - 200: Success with new access token
+     * - 401: Invalid or expired refresh token
+     * - 500: Server error
      */
     public function refresh(Request $request): JsonResponse
     {
@@ -90,8 +126,10 @@ class AuthController extends Controller
         ]);
 
         try {
+            // Attempt token refresh
             $result = $this->authService->refresh($validated['refresh_token']);
 
+            // Return success response with new access token
             return response()->json([
                 'success' => true,
                 'message' => 'Token refreshed successfully',
@@ -114,6 +152,10 @@ class AuthController extends Controller
                 'errors' => $exception->errors(),
             ], 401);
         } catch (\Exception $exception) {
+            // Unexpected error - log for debugging
+            Log::error('Token refresh exception', [
+                'message' => $exception->getMessage(),
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error refreshing token',
@@ -122,8 +164,19 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout endpoint
-     * POST /api/logout
+     * Logout Endpoint
+     *
+     * Revokes all user tokens (access and refresh).
+     * Requires authentication via access token.
+     *
+     * @route POST /api/logout
+     * @access Protected (requires auth:sanctum)
+     *
+     * @param Request $request HTTP request (user injected by middleware)
+     *
+     * @return JsonResponse
+     * - 200: Success
+     * - 500: Server error
      */
     public function logout(Request $request): JsonResponse
     {
@@ -143,24 +196,25 @@ class AuthController extends Controller
     }
 
     /**
-     * Get current authenticated user
-     * Get /api/user
+     * Get Current User Endpoint
+     *
+     * Returns authenticated user's information.
+     * Requires authentication via access token.
+     *
+     * @route GET /api/user
+     * @access Protected (requires auth:sanctum)
+     *
+     * @param Request $request HTTP request (user injected by middleware)
+     *
+     * @return JsonResponse
+     * - 200: Success with user data
+     * - 401: Not authenticated
      */
     public function user(Request $request): JsonResponse
     {
-        Log::info('=== User Endpoint Debug ===');
-        Log::info('Headers:', $request->headers->all());
-        Log::info('Authorization header:', [$request->header('Authorization')]);
-        Log::info('Bearer token:', [$request->bearerToken()]);
-        Log::info('Auth check:', [
-            'is_authenticated' => auth('sanctum')->check(),
-            'user_id' => auth('sanctum')->id(),
-        ]);
-
-        // Try to get user TODO remove debug
         $user = $request->user();
-        Log::info('Request user:', ['user' => $user]);
 
+        // Sanity check (should never happen with auth middleware)
         if (!$user) {
             return response()->json([
                 'success' => false,
