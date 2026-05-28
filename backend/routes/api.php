@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -29,6 +30,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- User dashboard (accessible by all authenticated users) ---
     Route::get('dashboard', [UserDashboardController::class, 'dashboard']);
+
+    // Ticket operation (all authenticated users)
+    Route::prefix('tickets')->group(function () {
+        Route::post('/', [TicketController::class, 'store']);
+        Route::get('/', [TicketController::class, 'index']);
+        Route::get('/{id}', [TicketController::class, 'show']);
+        Route::post('{id/submit', [TicketController::class, 'submit']);
+
+        // Messages (nested under tickets)
+        Route::post('/{id}/messages', [TicketController::class, 'addMessage']);
+        Route::post('/{id}/messages/{msgId}/image', [TicketController::class, 'uploadImage']);
+    });
 
     // --- Admin routes (accessible by admin and super_admin) ---
     Route::middleware('role:admin,super_admin')->prefix('admin')->group(function () {
