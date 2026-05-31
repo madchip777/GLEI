@@ -151,7 +151,14 @@ class TicketController
     {
         try {
             // Find ticket
-            $ticket = Ticket::with('messages', 'history', 'participants')->findOrFail($id);
+            $ticket = Ticket::with([
+                'messages' => function ($query) {
+                $query->with('user', 'image')->orderBy('created_at', 'asc');
+                },
+                'history' => function ($query) {
+                    $query->orderBy('created_at', 'desc');
+                }
+            ])->findOrFail($id);
 
             // Check access
             if (!$ticket->canAccess($request->user())) {

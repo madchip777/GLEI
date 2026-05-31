@@ -34,6 +34,7 @@ class TicketHistory extends Model
         'action_type',
         'old_values',
         'new_values',
+        'created_at',
     ];
 
     /**
@@ -67,6 +68,6 @@ class TicketHistory extends Model
      */
     public function changedBy()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'changed_by');
     }
 }

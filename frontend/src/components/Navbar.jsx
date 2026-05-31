@@ -89,6 +89,11 @@ const Navbar = () => {
                         Dashboard
                     </Link>
 
+                    {/* Tickets link - visible to all authenticated users */}
+                    <Link to="/tickets" className="navbar-link">
+                        🎫 Tickets
+                    </Link>
+
                     {/* Admin link - visible to admin and super_admin */}
                     {(user?.role === 'admin' || user?.role === 'super_admin') && (
                         <Link to="/admin" className="navbar-link">
