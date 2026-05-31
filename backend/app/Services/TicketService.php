@@ -70,8 +70,9 @@ class TicketService
         // Log creation
         TicketHistory::create([
             'ticket_id' => $ticket->id,
-            'user_id' => $user->id,
+            'changed_by' => $user->id,
             'action_type' => 'created',
+            'created_at' => now(),
             'new_values' => [
                 'status' => 'draft',
                 'title' => $data['title'],
@@ -122,7 +123,8 @@ class TicketService
         // Log status change
         TicketHistory::create([
             'ticket_id' => $ticket->id,
-            'user_id' => $user->id,
+            'changed_by' => $user->id,
+            'created_at' => now(),
             'action_type' => 'status_changed',
             'old_values' => ['status' => $oldStatus],
             'new_values' => ['status' => 'open'],
@@ -194,8 +196,7 @@ class TicketService
 
         $originalPath = $file->store('ticket-images/originals', 'local');
 
-        $thumbnailPath = $file->store($originalPath, $thumbnailFilename);
-
+        $thumbnailPath = $this->generateThumbnail($originalPath, $thumbnailFilename);
         [$width, $height] = getimagesize(storage_path('app/' . $originalPath));
 
         // Create database record
@@ -289,7 +290,7 @@ class TicketService
             $thumbnail, $image,
             0, 0,
             $cropX, $cropY,
-            self::THUMBNAIL_WIDTH, $cropWidth, $cropHeight,
+            self::THUMBNAIL_WIDTH, self::THUMBNAIL_HEIGHT,
             $cropWidth, $originalHeight
         );
 
@@ -337,6 +338,7 @@ class TicketService
             'ticket_id' => $ticket->id,
             'changed_by' => $changedBy->id,
             'action_type' => 'assigned',
+            'created_at' => now(),
             'old_values' => ['assigned_to' => $oldAssignment],
             'new_values' => ['assigned_to' => $admin->id],
         ]);
@@ -373,6 +375,7 @@ class TicketService
             'ticket_id' => $ticket->id,
             'changed_by' => $changedBy->id,
             'action_type' => 'status_changed',
+            'created_at' => now(),
             'old_values' => ['status' => $oldStatus],
             'new_values' => ['status' => $newStatus],
         ]);

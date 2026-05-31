@@ -234,4 +234,67 @@ export const dashboardAPI = {
     getSuperAdminConfig: () => api.get('/super-admin/system-config'),
 };
 
+/**
+ * Ticket API Endpoints
+ *
+ * Handles all ticket-related API calls:
+ * - Create, read, list tickets
+ * - Add massages and images
+ * - Poll for new messages
+ */
+export const ticketAPI = {
+    /**
+     * Create a new ticket (in draft status)
+     * @param {Object} data - Ticket data (title, description, category, priority)
+     * @return {Promise} API response with created ticket
+     */
+    createTicket: (data) => api.post('/tickets', data),
+
+    /**
+     * Get list of user's tickets
+     * @param {number} page - Page number for pagination
+     * @returns {Promise} API response with ticket list
+     */
+    listTickets: (page = 1) => api.get(`/tickets?page=${page}`),
+
+    /**
+     * Get ticket details with messages and history
+     * @param {number} id - Ticket ID
+     * @returns {Promise} API response with full ticket data
+     */
+    getTicket: (id) => api.get(`/tickets/${id}`),
+
+    /**
+     * Submit a draft ticket (changes status to open)
+     * @param {number} id - Ticket ID
+     * @returns {Promise} API response
+     */
+    submitTicket: (id) => api.post(`/tickets/${id}/submit`),
+
+    /**
+     * Add a message to a ticket
+     * @param {number} id -Ticket ID
+     * @param {string} content - Message text
+     * @returns {Promise} API response with created message
+     */
+    addMessage: (id, content) => api.post(`tickets/${id}/messages`, { content }),
+
+    /**
+     * Upload image to a message
+     * @param {number} id - Ticket ID
+     * @param {number} msgId - Message ID
+     * @param {File} file - Image file to upload
+     * @returns {Promise} API response with image data
+     */
+    uploadImage: (id, msgId, file) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        return api.post(`tickets/${id}/messages/${msgId}/image`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+    },
+}
+
 export default api;

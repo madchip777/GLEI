@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [TicketController::class, 'store']);
         Route::get('/', [TicketController::class, 'index']);
         Route::get('/{id}', [TicketController::class, 'show']);
-        Route::post('{id/submit', [TicketController::class, 'submit']);
+        Route::post('{id}/submit', [TicketController::class, 'submit']);
 
         // Messages (nested under tickets)
         Route::post('/{id}/messages', [TicketController::class, 'addMessage']);

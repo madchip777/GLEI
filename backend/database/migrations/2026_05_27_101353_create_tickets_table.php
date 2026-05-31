@@ -18,6 +18,10 @@ return new class extends Migration
             $table->id();
 
             // Foreign key to users table (ticket creator)
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+            // Foreign key to users table (assigned admin/support staff)
+            // Nullable - ticket may not be assigned initially
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
 
             // Ticket metadata
