@@ -9,40 +9,43 @@ return new class extends Migration
     /**
      * Ticket History Table Migration
      *
-     * Audit trail for ticket status changes, priority and assignments.
-     * Immutable record compliance
+     * Immutable audit trail for every change made to a ticket.
+     * old_values and new_values store the before/after state as JSON
+     * so any field change (status, priority, assignment, etc.) is captured
+     * without needing a column per attribute.
      */
     public function up(): void
     {
         Schema::create('ticket_history', function (Blueprint $table) {
-            $table->id();
+            $table->id('history_id');
 
-            // Foreign key to tickets table
-            $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
+            $table->foreignId('ticket_id')
+                ->constrained('tickets', 'ticket_id')
+                ->onDelete('cascade');
 
-            // User who made the change
-            $table->foreignId('changed_by')->constrained('users')->onDelete('cascade');
+            // User who triggered the change
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
 
-            // What changed
             $table->enum('action_type', [
-                'created',      // Ticket created
-                'status_changed', // Status changed
-                'assigned',     // Assigned to user
-                'unassigned',   // Unassigned from user
-                'priority_changed', // Priority changed
-                'category_changed'  // Category changed
+                'created',
+                'status_changed',
+                'assigned',
+                'unassigned',
+                'priority_changed',
+                'category_changed',
             ]);
 
-            // Previous and new values (JSON for flexibility)
-            $table->json('old_values')->nullable(); // Previous state
-            $table->json('new_values')->nullable(); // New state
+            // JSON snapshots of the changed fields before and after
+            $table->json('old_values')->nullable();
+            $table->json('new_values')->nullable();
 
-            // Timestamp of change
-            $table->timestamp('created_at');
+            // Immutable: only creation timestamp
+            $table->timestamp('created_at')->useCurrent();
 
-            // Indexes
             $table->index('ticket_id');
-            $table->index('changed_by');
+            $table->index('user_id');
             $table->index('created_at');
         });
     }

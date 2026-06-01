@@ -9,42 +9,70 @@ return new class extends Migration
     /**
      * Tickets Table Migration
      *
-     * Stores main ticket records with status tracking.
-     * Supports multiple ticket types (It issues, cybersecurity incidents, etc).
+     * Central table of the support system.
+     * A ticket tracks an IT issue, security incident, access request, etc.
+     * from creation (draft) through to resolution (closed).
+     *
+     * Lifecycle: draft -> open -> in_progress -> pending_info -> resolved -> closed
+     *
+     * Assignment is handled by the ticket_admins pivot table (one ticket
+     * can have multiple assigned admins).  The legacy single-column
+     * "assigned_to" has been removed in favour of that pivot.
      */
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id();
+            $table->id('ticket_id');
 
-            // Foreign key to users table (ticket creator)
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
+            // Creator
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('restrict');
 
-            // Ticket metadata
-            $table->string('title'); // Short issue description
-            $table->text('description'); // Full problem description
-            $table->string('category'); // IT Issue, Security Incident, Access Request, etc.
+            // Normalised category (nullable to allow a grace period for old data)
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('categories')
+                ->onDelete('set null');
 
-            // Status tracking (draft, open, in_progress, pending_info, resolved, closed)
+            // Keeps the raw category string from before normalisation
+            $table->string('category_legacy', 100)->nullable();
+
+            $table->string('title');
+            $table->text('description');
+            $table->string('subject', 255)->nullable();
+
             $table->enum('status', [
-                'draft',        // Not yet submitted
-                'open',         // Submitted, waiting for response
-                'in_progress',  // Admin working on it
-                'pending_info', // Waiting for more info from the user
-                'resolved',     // Issue fixed, pending user confirmation
-                'closed',       // Confirmed fixed or user confirmed resolution
+                'draft',
+                'open',
+                'in_progress',
+                'pending_info',
+                'resolved',
+                'closed',
             ])->default('draft');
 
-            // Priority level
-            $table->enum('priority', ['low', 'medium', 'high', 'critical'])->default('medium');
+            $table->enum('priority', [
+                'low',
+                'medium',
+                'high',
+                'critical',
+            ])->default('medium');
+
+            // Admin who closed the ticket
+            $table->foreignId('closed_by')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
 
             $table->timestamps();
+            $table->timestamp('closed_at')->nullable();
 
             // Indexes for common queries
-            $table->index('user_id'); // Find tickets by creator
-            $table->index('assigned_to'); // Find tickets assigned to user
-            $table->index('status'); // Find tickets by status
-            $table->index('created_at'); // Order by creation date
+            $table->index('user_id');
+            $table->index('category_id');
+            $table->index('status');
+            $table->index('priority');
+            $table->index('created_at');
         });
     }
 

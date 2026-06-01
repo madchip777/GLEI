@@ -7,12 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Add role, material and post_num columns to users table.
+     *
+     * role    : defines user permissions (user | admin | super_admin)
+     * material: IT equipment assigned to the user (e.g. laptop model)
+     * post_num: office/desk number to help locate the user on-site
      */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('user')->after('email');
+            $table->enum('role', ['user', 'admin', 'super_admin'])->default('user')->after('email');
+            $table->string('material', 100)->nullable()->after('role');
+            $table->string('post_num', 50)->nullable()->after('material');
         });
     }
 
@@ -22,7 +28,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            $table->dropColumn(['role', 'material', 'post_num']);
         });
     }
 };

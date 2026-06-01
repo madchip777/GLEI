@@ -9,31 +9,30 @@ return new class extends Migration
     /**
      * Ticket Participants Table Migration
      *
-     * Defines who can access/see each ticket.
-     * Implements access control for ticket visibility.
+     * Defines who can see and interact with each ticket.
+     * Access control is enforced at the application layer using this table.
+     *
+     * Roles:
+     *   creator  - original ticket creator (full access, can submit)
+     *   assigned - admin/support staff assigned to the ticket (can respond, change status)
+     *   viewer   - read-only access (e.g. a manager added for visibility)
      */
     public function up(): void
     {
         Schema::create('ticket_participants', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('ticket_id')
+                ->constrained('tickets', 'ticket_id')
+                ->onDelete('cascade');
 
-            // Foreign keys
-            $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
 
-            // Permission level
             $table->enum('role', ['creator', 'assigned', 'viewer'])->default('viewer');
-            // 'creator' = original ticket creator (can edit before submission)
-            // 'assigned' = assigned admin/support staff (can respond, change status)
-            // 'viewer' = can view only (read-only access)
 
-            // Timestamps
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
 
-            // Unique constraint - each user once per ticket
-            $table->unique(['ticket_id', 'user_id']);
-
-            // Indexes
+            $table->primary(['ticket_id', 'user_id']);
             $table->index('ticket_id');
             $table->index('user_id');
         });

@@ -2,23 +2,37 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Ordre d'execution respectant les contraintes de cles etrangeres.
      *
-     * @return void
+     * 1. Users          (aucune dependance)
+     * 2. Softwares      (aucune dependance)
+     * 3. UserSoftware   (depend de users + softwares)
+     * 4. Categories     (depend de users - created_by)
+     * 5. Tickets        (depend de users + categories)
+     * 6. TicketAdmins   (depend de tickets + users)
+     * 7. TicketPart.    (depend de tickets + users)
+     * 8. TicketHistory  (depend de tickets + users)
+     * 9. Messages       (depend de tickets + users)
+     * 10. Attachments   (depend de messages)
      */
-    public function run()
+    public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $this->call([
+            UserSeeder::class,
+            SoftwareSeeder::class,
+            UserSoftwareSeeder::class,
+            CategorySeeder::class,
+            TicketSeeder::class,
+            TicketAdminSeeder::class,
+            TicketParticipantSeeder::class,
+            TicketHistorySeeder::class,
+            MessageSeeder::class,
+            AttachmentSeeder::class,
+        ]);
     }
 }
