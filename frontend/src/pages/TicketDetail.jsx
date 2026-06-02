@@ -204,6 +204,45 @@ const TicketDetail = () => {
     };
 
     /**
+     * Close ticket (any -> close)
+     */
+    const handleCloseTicket = async () => {
+        try {
+            await ticketAPI.setStatusTicket(id,"closed");
+            await fetchTicket();
+        } catch (error) {
+            setError('Failed to close ticket');
+            console.error(error);
+        }
+    };
+
+    /**
+     * Archive ticket (any -> archived)
+     */
+    const handleArchiveTicket = async () => {
+        try {
+            await ticketAPI.setStatusTicket(id,"archived");
+            await fetchTicket();
+        } catch (error) {
+            setError('Failed to archive ticket');
+            console.error(error);
+        }
+    };
+
+    /**
+     * Resolved ticket (any -> resolved )
+     */
+    const handleResolveTicket = async () => {
+        try {
+            await ticketAPI.setStatusTicket(id,"resolved");
+            await fetchTicket();
+        } catch (error) {
+            setError('Failed to resolve ticket');
+            console.error(error);
+        }
+    };
+
+    /**
      * View image securely with auth
      */
     const handleViewImage = async (image) => {
@@ -381,8 +420,36 @@ const TicketDetail = () => {
                             onClick={() => navigate('/tickets')}
                             className="ticket-action-btn"
                         >
-                            Close
+                            Back
                         </button>
+
+                        {( (ticket.status != 'resolved' ) && (user?.role === 'admin' || user?.role === 'super_admin') ) && (
+                            <button
+                                onClick={handleResolveTicket}
+                                className="ticket-action-btn primary"
+                            >
+                                Set resolved
+                            </button>
+                        )}
+
+                        {( (ticket.status != 'closed' ) && (user?.role === 'admin' || user?.role === 'super_admin') ) && (
+                            <button
+                                onClick={handleCloseTicket}
+                                className="ticket-action-btn primary"
+                            >
+                                Set closed
+                            </button>
+                        )}
+
+                        {( (ticket.status != 'archived' ) && (user?.role === 'admin' || user?.role === 'super_admin') ) && (
+                            <button
+                                onClick={handleArchiveTicket}
+                                className="ticket-action-btn primary"
+                            >
+                                Set archived
+                            </button>
+                        )}
+
                     </div>
                 </div>
 

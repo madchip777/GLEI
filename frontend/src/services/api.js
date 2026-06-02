@@ -272,6 +272,13 @@ export const ticketAPI = {
     submitTicket: (id) => api.post(`/tickets/${id}/submit`),
 
     /**
+     * Submit a draft ticket (changes status to open)
+     * @param {number} id - Ticket ID
+     * @returns {Promise} API response
+     */
+    setStatusTicket: (id, status) => api.post(`/tickets/${id}/status`, status),
+
+    /**
      * Add a message to a ticket
      * @param {number} id -Ticket ID
      * @param {string} content - Message text

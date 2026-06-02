@@ -33,10 +33,11 @@ return new class extends Migration
             $table->enum('status', [
                 'draft',        // Not yet submitted
                 'open',         // Submitted, waiting for response
-                'in_progress',  // Admin working on it
-                'pending_info', // Waiting for more info from the user
+                // 'in_progress',  // Admin working on it
+                // 'pending_info', // Waiting for more info from the user
                 'resolved',     // Issue fixed, pending user confirmation
                 'closed',       // Confirmed fixed or user confirmed resolution
+                'archived',
             ])->default('draft');
 
             // Priority level

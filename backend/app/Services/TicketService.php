@@ -365,6 +365,7 @@ class TicketService
      *
      * @return Ticket Updated ticket
      */
+
     public function updateStatus(Ticket $ticket, string $newStatus, User $changedBy): Ticket
     {
         $oldStatus = $ticket->status;

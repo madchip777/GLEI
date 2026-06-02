@@ -318,6 +318,21 @@ class TicketController
         }
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:closed,archived,resolved', // adjust to your statuses
+        ]);
+
+        $ticket = Ticket::findOrFail($id);
+        $ticket->update(['status' => $request->status]);
+
+        return response()->json([
+            'message' => 'Status updated successfully.',
+            'ticket'  => $ticket,
+        ]);
+    }
+
     /**
      * Upload Image to Message
      *
