@@ -36,11 +36,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [TicketController::class, 'store']);
         Route::get('/', [TicketController::class, 'index']);
         Route::get('/{id}', [TicketController::class, 'show']);
-        Route::post('{id}/submit', [TicketController::class, 'submit']);
+        Route::post('/{id}/submit', [TicketController::class, 'submit']);
 
         // Messages (nested under tickets)
         Route::post('/{id}/messages', [TicketController::class, 'addMessage']);
         Route::post('/{id}/messages/{msgId}/image', [TicketController::class, 'uploadImage']);
+
+        // Images serving (protected, with access control)
+        Route::get('/{id}/messages/{msgId}/image/view', [TicketController::class, 'viewImage']);
     });
 
     // --- Admin routes (accessible by admin and super_admin) ---
@@ -54,6 +57,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [SuperAdminController::class, 'dashboard']);
         Route::get('/system-config', [SuperAdminController::class, 'systemConfig']);
     });
-
-    // TODO: Add more protected routes here (e.g. user profile, admin dashboard, etc.)
 });

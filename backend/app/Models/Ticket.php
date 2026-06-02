@@ -117,13 +117,18 @@ class Ticket extends Model
      */
     public function canReply(User $user): bool
     {
-        // Admins can always reply
-        if ($user->isAdmin() || $user->isSuperAdmin()) {
+        // Creator can reply if not closed
+        if ($this->user_id === $user->id && $this->status !== 'closed') {
             return true;
         }
 
-        // Creator can reply if not closed
-        if ($this->user_id === $user->id && $this->status !== 'closed') {
+        // Assigned admin can reply anytime
+        if ($this->assigned_to === $user->id) {
+            return true;
+        }
+
+        // Other admins can reply
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
             return true;
         }
 

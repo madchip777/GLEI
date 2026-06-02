@@ -47,6 +47,11 @@ class TicketImage extends Model
     ];
 
     /**
+     * Disable timestamps
+     */
+    public $timestamps = true;
+
+    /**
      * Relationship: Image belongs to a TicketMessage
      */
     public function message()
@@ -57,9 +62,9 @@ class TicketImage extends Model
     /**
      * Get full URL to original image
      */
-    public function getOriginalUrl()
+    public function getOriginalUrl(): string
     {
-        return url('api/ticket-images/' . $this->id . '/original');
+        return url('api/tickets/' . $this->message->ticket_id . '/messages/' . $this->message_id . '/image/view');
     }
 
     /**
@@ -67,6 +72,31 @@ class TicketImage extends Model
      */
     public function getThumbnailUrl(): string
     {
-        return url('api/ticket-images/' . $this->id . '/thumbnail');
+        return url('storage/' . $this->thumbnail_path);
+    }
+
+    /**
+     * Append computed attributes to JSON
+     */
+    protected $appends = [
+        'original_url',
+        'thumbnail_url',
+    ];
+
+    /**
+     * Accessor: original_url
+     */
+    public function getOriginalUrlAttribute(): string
+    {
+        return $this->getOriginalUrl();
+    }
+
+
+    /**
+     * Accessor: thumbnail_url
+     */
+    public function getThumbnailUrlAttribute(): string
+    {
+        return $this->getThumbnailUrl();
     }
 }

@@ -8,6 +8,7 @@ use App\Services\TicketService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -157,7 +158,8 @@ class TicketController
                 },
                 'history' => function ($query) {
                     $query->orderBy('created_at', 'desc');
-                }
+                },
+                'creator'
             ])->findOrFail($id);
 
             // Check access
@@ -173,12 +175,14 @@ class TicketController
                 'data' => [
                     'ticket' => [
                         'id' => $ticket->id,
+                        'user_id' => $ticket->user_id,
                         'title' => $ticket->title,
                         'description' => $ticket->description,
                         'status' => $ticket->status,
                         'priority' => $ticket->priority,
                         'category' => $ticket->category,
                         'created_at' => $ticket->created_at,
+                        'creator' => $ticket->creator,
                         'messages' => $ticket->messages,
                         'history' => $ticket->history,
                     ],
@@ -378,6 +382,43 @@ class TicketController
                 'success' => false,
                 'message' => 'Error uploading image: ' . $exception->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * View image (with access control)
+     */
+    public function viewImage(Request $request, int $id, int $msgId)
+    {
+        try {
+            $ticket = Ticket::findOrFail($id);
+
+            // Check if user has access
+            if (!$ticket->canAccess($request->user())) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Get message and image
+            $message = TicketMessage::where('id', $msgId)
+                ->where('ticket_id', $id)
+                ->firstOrFail();
+
+            $image = $message->image;
+            if (!$image) {
+                abort(404, 'Image not found');
+            }
+
+            $imageStoragePath = env('IMAGE_STORAGE_PATH');
+            $path = $imageStoragePath . DIRECTORY_SEPARATOR . $image->original_path;
+
+            if (!file_exists($path)) {
+                abort(404, 'File not found');
+            }
+
+            return response()->file($path);
+
+        } catch (\Exception $e) {
+            abort(404);
         }
     }
 }

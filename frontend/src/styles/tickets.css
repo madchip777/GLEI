@@ -189,20 +189,32 @@
 
 .message-header {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 0.5rem;
+}
+
+.message-header > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
 }
 
 .message-author {
     font-weight: bold;
     color: #2c3e50;
-    font-size: 0.9rem;
+    font-size: 0.5rem;
 }
 
 .message-time {
     font-size: 0.8rem;
     color: #95a5a6;
+}
+
+.message-email {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-left: 0.25rem;
 }
 
 .message-body {
@@ -214,19 +226,22 @@
 }
 
 .message-image {
-    margin-top: 0.75rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .message-image-thumbnail {
     max-width: 300px;
     max-height: 300px;
-    border-radius: 4px;
+    border-radius: 8px;
+    border: 1px solid #ecf0f1;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s;
 }
 
 .message-image-thumbnail:hover {
     transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .message-system {

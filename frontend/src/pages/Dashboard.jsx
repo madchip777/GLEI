@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { dashboardAPI } from '../services/api';
+import {dashboardAPI, ticketAPI} from '../services/api';
 import Navbar from '../components/Navbar';
 import '../styles/dashboard.css';
 import '../styles/common.css';
@@ -15,10 +16,14 @@ import '../styles/common.css';
  * @component
  */
 const Dashboard = () => {
+    const navigate = useNavigate();
     const { user, loading: authLoading } = useAuth();
+    const [userTickets, setUserTickets] = useState([]);
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [ticketsLoading, setTicketsLoading] = useState(false);
     const [error, setError] = useState('');
+
 
     /**
      * Fetch dashboard data from API
@@ -42,6 +47,27 @@ const Dashboard = () => {
 
         fetchDashboard();
     }, [authLoading]);
+
+    /**
+     * Fetch user tickets on mount
+     */
+    useEffect(() => {
+        if (authLoading || !user) return;
+
+        const fetchTickets = async () => {
+            try {
+                setTicketsLoading(true);
+                const response = await ticketAPI.listTickets();
+                setUserTickets(response.data.data.tickets || []);
+            } catch (error) {
+                console.error('Failed to load tickets: ', error);
+            } finally {
+                setTicketsLoading(false);
+            }
+        };
+
+        fetchTickets();
+    }, [authLoading, user])
 
     // Show loading state
     if (authLoading || loading) {
@@ -92,28 +118,44 @@ const Dashboard = () => {
                 </div>
 
                 {/* Tickets Section */}
-                <div className="tickets-section">
-                    <h2 className="card-header">Mes tickets</h2>
+                <div className="info-section">
+                    <h2 style={{ marginBottom: '1.5rem' }}>Your Recent Tickets</h2>
 
-                    {dashboardData?.my_tickets?.length > 0 ? (
-                        <div className="grid-gap">
-                            {dashboardData.my_tickets.map((ticket) => (
-                                <div key={ticket.id} className="list-item">
-                                    <div>
-                                        <p className="list-item-title">
+                    {ticketsLoading ? (
+                        <p className="loading-text">Loading tickets...</p>
+                    ) : userTickets.length > 0 ? (
+                        <div className="ticket-list">
+                            {userTickets.slice(0, 5).map(ticket => (
+                                <div
+                                    key={ticket.id}
+                                    className="ticket-item"
+                                    onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div style={{ flex: 1 }}>
+                                        <h4 style={{ margin: '0 0 0.5rem 0', color: '#2c3e50' }}>
                                             #{ticket.id} - {ticket.title}
+                                        </h4>
+                                        <p style={{ margin: '0 0 0.75rem 0', color: '#7f8c8d', fontSize: '0.9rem' }}>
+                                            {ticket.description}
                                         </p>
+                                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                            <span className={`status-badge status-${ticket.status}`}>
+                                                {ticket.status.replace('_', ' ')}
+                                            </span>
+                                            <span className={`priority-badge priority-${ticket.priority}`}>
+                                                {ticket.priority}
+                                            </span>
+                                            <span style={{ fontSize: '0.85rem', color: '#95a5a6' }}>
+                                                {new Date(ticket.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span className={`badge ${
-                                        ticket.status === 'ouvert' ? 'badge-danger' : 'badge-warning'
-                                    }`}>
-                                        {ticket.status}
-                                    </span>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="tickets-empty">Aucun ticket pour le moment</p>
+                        <p style={{ color: '#7f8c8d' }}>No tickets yet. <a href="/tickets/new">Create one</a></p>
                     )}
                 </div>
             </div>

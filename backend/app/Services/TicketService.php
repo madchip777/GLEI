@@ -194,10 +194,13 @@ class TicketService
         $storedFilename = uniqid() . '-' . time() . '.' . $file->getClientOriginalExtension();
         $thumbnailFilename = 'thumb_' . $storedFilename;
 
-        $originalPath = $file->store('ticket-images/originals', 'local');
-
+        // Store using configured disk
+        $originalPath = $file->store('originals', 'ticket-images');
         $thumbnailPath = $this->generateThumbnail($originalPath, $thumbnailFilename);
-        [$width, $height] = getimagesize(storage_path('app/' . $originalPath));
+
+        $imageStoragePath = env('IMAGE_STORAGE_PATH');
+        $fullOriginalPath = $imageStoragePath . DIRECTORY_SEPARATOR . $originalPath;
+        [$width, $height] = getimagesize($fullOriginalPath);
 
         // Create database record
         $image = TicketImage::create([
@@ -263,10 +266,10 @@ class TicketService
      */
     private function generateThumbnail(string $originalPath, string $thumbnailFilename): string
     {
-        $originalFullPath = storage_path('app/' . $originalPath);
+        $imageStoragePath = env('IMAGE_STORAGE_PATH');
+        $originalFullPath = $imageStoragePath . DIRECTORY_SEPARATOR . $originalPath;
 
         $image = imagecreatefromstring(file_get_contents($originalFullPath));
-
         $originalWidth = imagesx($image);
         $originalHeight = imagesy($image);
 
@@ -294,20 +297,19 @@ class TicketService
             $cropWidth, $originalHeight
         );
 
-        // Seve thumbnail
-        $thumbnailPath = 'ticket-images/thumbnails/' . $thumbnailFilename;
-        $thumbnailFullPath = storage_path('app/' . $thumbnailPath);
+        // Serve thumbnail
+        $thumbnailPath = 'thumbnails/' . DIRECTORY_SEPARATOR . $thumbnailFilename;
+        $thumbnailFullPath = $imageStoragePath . DIRECTORY_SEPARATOR . $thumbnailPath;
 
         if (!is_dir(dirname($thumbnailFullPath))) {
             mkdir(dirname($thumbnailFullPath), 0755, true);
         }
 
         imagejpeg($thumbnail, $thumbnailFullPath, 85);
-
         unset($image);
         unset($thumbnail);
 
-        return $thumbnailPath;
+        return str_replace(DIRECTORY_SEPARATOR, '/', $thumbnailPath);
     }
 
     /**

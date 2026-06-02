@@ -56,6 +56,11 @@ return [
             'throw' => false,
         ],
 
+        'ticket_images' => [
+            'driver' => 'local',
+            'root' => env('IMAGE_STORAGE_PATH', storage_path('app/ticket-images')),
+            'visibility' => 'private',
+        ],
     ],
 
     /*

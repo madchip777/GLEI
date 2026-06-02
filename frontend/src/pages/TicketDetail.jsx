@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { ticketAPI } from "../services/api.js";
+import { fetchImageAsBlob } from "../services/imageService.js";
 import Navbar from "../components/Navbar.jsx";
 import '../styles/tickets.css';
 import '../styles/common.css';
@@ -203,6 +204,19 @@ const TicketDetail = () => {
     };
 
     /**
+     * View image securely with auth
+     */
+    const handleViewImage = async (image) => {
+        try {
+            const blobUrl = await fetchImageAsBlob(id, image.message_id);
+            window.open(blobUrl, '_blank');
+        } catch (error) {
+            setError('Failed to load image - access denied');
+            console.error(error);
+        }
+    };
+
+    /**
      * Format date/time for display
      */
     const formatDateTime = (dateString) => {
@@ -228,6 +242,34 @@ const TicketDetail = () => {
             .toUpperCase()
             .slice(0, 2) || '?';
     };
+
+    /**
+     * DEBUG: Log values to console
+     */
+    useEffect(() => {
+        if (ticket && user) {
+            console.log('=== TICKET DETAIL DEBUG ===');
+            console.log('User object:', {
+                id: user?.id,
+                name: user?.name,
+                role: user?.role,
+                type_of_id: typeof user?.id
+            });
+            console.log('Ticket object:', {
+                id: ticket.id,
+                user_id: ticket.user_id,
+                status: ticket.status,
+                type_of_user_id: typeof ticket.user_id
+            });
+            console.log('Condition checks:', {
+                is_creator: user?.id === ticket.user_id,
+                is_admin: user?.role === 'admin',
+                is_super_admin: user?.role === 'super_admin',
+                is_not_closed: ticket.status !== 'closed',
+                should_show_form: (user?.id === ticket.user_id || user?.role === 'admin' || user?.role === 'super_admin') && ticket.status !== 'closed'
+            });
+        }
+    }, [ticket, user]);
 
     // Loading state
     if (authLoading || loading) {
@@ -352,7 +394,7 @@ const TicketDetail = () => {
                     {messages.length > 0 ? (
                         <div className="ticket-messages">
                             <div className="message-list">
-                                {messages.map((message) => {
+                                {messages.map(message => {
                                     const { time, isToday } = formatDateTime(message.created_at);
                                     return (
                                         <div key={message.id} className="message-item">
@@ -361,9 +403,16 @@ const TicketDetail = () => {
                                             </div>
                                             <div className="message-content">
                                                 <div className="message-header">
-                                                    <span className="message-author">
-                                                        {message.user?.name}
-                                                    </span>
+                                                    <div>
+                                                        <span className="message-author">
+                                                            {message.user?.name || "Unknown USer"}
+                                                        </span>
+                                                        {message.user?.email && (
+                                                            <span className="message-email">
+                                                                {message.user.email}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <span className="message-time">
                                                         {time}
                                                     </span>
@@ -371,15 +420,17 @@ const TicketDetail = () => {
                                                 <div className="message-body">
                                                     {message.content}
                                                 </div>
-                                                {/* Image attachment */}
+
+                                                {/* Image attachement - if message has an image */}
                                                 {message.image && (
                                                     <div className="message-image">
                                                         <img
                                                             src={message.image.thumbnail_url}
-                                                            alt="Message attachment"
+                                                            alt="Attachment"
                                                             className="message-image-thumbnail"
-                                                            onClick={() => window.open(message.image.original_url)}
-                                                            title="Click to view original"
+                                                            onClick={() => handleViewImage(message.image)}
+                                                            title="Click to view original image"
+                                                            style={{ cursor: 'pointer' }}
                                                         />
                                                     </div>
                                                 )}
