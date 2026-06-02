@@ -187,42 +187,61 @@ class TicketService
      */
     public function uploadImage(TicketMessage $message, $file): TicketImage
     {
-        $this->validateImage($file);
+        try {
+            $this->validateImage($file);
 
-        // Generates secure filenames
-        $originalFilename = $file->getClientOriginalName();
-        $storedFilename = uniqid() . '-' . time() . '.' . $file->getClientOriginalExtension();
-        $thumbnailFilename = 'thumb_' . $storedFilename;
+            // Generates secure filenames
+            $originalFilename = $file->getClientOriginalName();
+            $storedFilename = uniqid() . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $thumbnailFilename = 'thumb_' . $storedFilename;
 
-        // Store using configured disk
-        $originalPath = $file->store('originals', 'ticket-images');
-        $thumbnailPath = $this->generateThumbnail($originalPath, $thumbnailFilename);
+            Log::info('Starting image upload', ['filename' => $originalFilename]);
 
-        $imageStoragePath = env('IMAGE_STORAGE_PATH');
-        $fullOriginalPath = $imageStoragePath . DIRECTORY_SEPARATOR . $originalPath;
-        [$width, $height] = getimagesize($fullOriginalPath);
+            // Store using configured disk
+            $originalPath = $file->store('originals', 'ticket_images');
+            Log::info('Image stored', ['path' => $originalPath]);
 
-        // Create database record
-        $image = TicketImage::create([
-            'message_id' => $message->id,
-            'original_filename' => $originalFilename,
-            'stored_filename' => $storedFilename,
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'thumbnail_filename' => $thumbnailFilename,
-            'original_path' => $originalPath,
-            'thumbnail_path' => $thumbnailPath,
-            'width' => $width,
-            'height' => $height,
-        ]);
+            $thumbnailPath = $this->generateThumbnail($originalPath, $thumbnailFilename);
+            Log::info('Thumbnail generated', ['path' => $thumbnailPath]);
 
-        Log::info('Ticket image uploaded', [
-            'image_id' => $image->id,
-            'message_id' => $message->id,
-            'file_size' => $file->getSize(),
-        ]);
+            $imageStoragePath = env('IMAGE_STORAGE_PATH');
+            $fullOriginalPath = $imageStoragePath . DIRECTORY_SEPARATOR . $originalPath;
 
-        return $image;
+            Log::info('Getting image dimensions', ['full_path' => $fullOriginalPath, 'exists' => file_exists($fullOriginalPath)]);
+
+            [$width, $height] = getimagesize($fullOriginalPath);
+
+            // Create database record
+            $image = TicketImage::create([
+                'message_id' => $message->id,
+                'original_filename' => $originalFilename,
+                'stored_filename' => $storedFilename,
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'thumbnail_filename' => $thumbnailFilename,
+                'original_path' => $originalPath,
+                'thumbnail_path' => $thumbnailPath,
+                'width' => $width,
+                'height' => $height,
+            ]);
+
+            Log::info('Ticket image uploaded', [
+                'image_id' => $image->id,
+                'message_id' => $message->id,
+                'file_size' => $file->getSize(),
+            ]);
+
+            return $image;
+        } catch (\Exception $exception) {
+            Log::error(
+                'Image upload failed', [
+                    'error' => $exception->getMessage(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine()
+                ]);
+            throw $exception;
+        }
+
     }
 
     /**

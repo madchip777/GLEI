@@ -19,10 +19,22 @@ export const fetchImageAsBlob = async (ticketId, messageId) => {
             }
         );
 
-        // Create temporary blob URL
-        return URL.createObjectURL(response.data);
+        // Convert blob to data URL for display
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(response.data);
+        });
     } catch (error) {
         console.error('Failed to fetch image:', error);
         throw error;
     }
+};
+
+/**
+ * Fetch thumbnail as blob
+ */
+export const fetchThumbnailAsBlob = async (ticketId, messageId) => {
+    return fetchImageAsBlob(ticketId, messageId);
 };

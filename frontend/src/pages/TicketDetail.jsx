@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { ticketAPI } from "../services/api.js";
-import { fetchImageAsBlob } from "../services/imageService.js";
+import { fetchImageAsBlob, fetchThumbnailAsBlob } from "../services/imageService.js";
 import Navbar from "../components/Navbar.jsx";
 import '../styles/tickets.css';
 import '../styles/common.css';
@@ -43,6 +43,9 @@ const TicketDetail = () => {
     // Image upload state
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
+
+    // Image URL
+    const [imageDataUrls, setImageDataUrls] = useState({});
 
     /**
      * Fetch ticket details and messages
@@ -111,13 +114,45 @@ const TicketDetail = () => {
     }, [messages]);
 
     /**
+     * Load image thumbnails securely
+     */
+    useEffect(() => {
+        const loadImages = async () => {
+            const urls = {};
+
+            for (const message of messages) {
+                if (message.image) {
+                    try {
+                        const dataUrl = await fetchThumbnailAsBlob(id, message.id);
+                        urls[message.id] = dataUrl;
+                    } catch (err) {
+                        console.error('Failed to load thumbnail:', err);
+                    }
+                }
+            }
+
+            setImageDataUrls(urls);
+        };
+
+        if (messages.length > 0) {
+            loadImages();
+        }
+    }, [messages, id]);
+
+    /**
      * Handle image file selection
      */
     const handleImageSelect = (e) => {
         const files = Array.from(e.target.files);
-        setSelectedImages(prev => [...prev, ...files]);
+        const newImages = files.map(file => ({
+            file,
+            previewUrl: URL.createObjectURL(file),
+        }));
+
+        setSelectedImages(prev => [...prev, ...newImages]);
+
         e.target.value = '';
-    }
+    };
 
     /**
      * Handle drag and drop for images
@@ -134,10 +169,16 @@ const TicketDetail = () => {
     const handleDrop = (e) => {
         e.preventDefault();
         e.currentTarget.classList.remove('drag-over');
+
         const files = Array.from(e.dataTransfer.files);
         const imageFiles = files.filter(f => f.type.startsWith('image/'));
-        setSelectedImages(prev => [...prev, ...imageFiles]);
-    }
+        const newImages = imageFiles.map(file => ({
+            file,
+            previewUrl: URL.createObjectURL(file),
+        }));
+
+        setSelectedImages(prev => [...prev, ...newImages]);
+    };
 
     /**
      * Remove  selected image
@@ -206,13 +247,24 @@ const TicketDetail = () => {
     /**
      * View image securely with auth
      */
+    /**
+     * View original image securely with auth
+     */
     const handleViewImage = async (image) => {
         try {
-            const blobUrl = await fetchImageAsBlob(id, image.message_id);
-            window.open(blobUrl, '_blank');
-        } catch (error) {
+            const dataUrl = await fetchImageAsBlob(id, image.message_id);
+            const win = window.open('', '_blank');
+
+            const img = win.document.createElement('img');
+            img.src = dataUrl;
+            img.style.maxWidth = '100%';
+
+            win.document.body.style.margin = '0';
+            win.document.body.style.background = '#111';
+            win.document.body.appendChild(img);
+        } catch (err) {
             setError('Failed to load image - access denied');
-            console.error(error);
+            console.error(err);
         }
     };
 
@@ -395,7 +447,7 @@ const TicketDetail = () => {
                         <div className="ticket-messages">
                             <div className="message-list">
                                 {messages.map(message => {
-                                    const { time, isToday } = formatDateTime(message.created_at);
+                                    const { time} = formatDateTime(message.created_at);
                                     return (
                                         <div key={message.id} className="message-item">
                                             <div className="message-avatar">
@@ -425,7 +477,7 @@ const TicketDetail = () => {
                                                 {message.image && (
                                                     <div className="message-image">
                                                         <img
-                                                            src={message.image.thumbnail_url}
+                                                            src={imageDataUrls[message.id]}
                                                             alt="Attachment"
                                                             className="message-image-thumbnail"
                                                             onClick={() => handleViewImage(message.image)}

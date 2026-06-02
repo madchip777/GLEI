@@ -72,7 +72,7 @@ class TicketImage extends Model
      */
     public function getThumbnailUrl(): string
     {
-        return url('storage/' . $this->thumbnail_path);
+        return url('api/tickets/' . $this->message->ticket_id . '/messages/' . $this->message_id . '/image/view');
     }
 
     /**
