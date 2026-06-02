@@ -32,7 +32,6 @@ const TicketDetail = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [pollInterval, setPollInterval] = useState(null);
 
     // Message from state
     const [messageContent, setMessageContent] = useState('');
@@ -46,6 +45,12 @@ const TicketDetail = () => {
 
     // Image URL
     const [imageDataUrls, setImageDataUrls] = useState({});
+
+    useEffect(() => {
+        return () => {
+            selectedImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
+        };
+    }, [selectedImages]);
 
     /**
      * Fetch ticket details and messages
@@ -69,7 +74,12 @@ const TicketDetail = () => {
      */
     useEffect(() => {
         if (authLoading) return;
-        fetchTicket();
+
+        const loadTicket = async () => {
+            await fetchTicket();
+        };
+
+        loadTicket();
     }, [authLoading, id]);
 
     /**
@@ -98,8 +108,6 @@ const TicketDetail = () => {
                     console.error('Polling error:', err);
                 }
             }, 3000); // Poll every 3 seconds
-
-            setPollInterval(interval);
 
             return () => clearInterval(interval);
         }
@@ -184,7 +192,10 @@ const TicketDetail = () => {
      * Remove  selected image
      */
     const removeImage = (index) => {
-        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+        setSelectedImages(prev => {
+            URL.revokeObjectURL(prev[index].previewUrl);
+            return prev.filter((_, i) => i !== index);
+        });
     }
 
     /**
@@ -207,9 +218,9 @@ const TicketDetail = () => {
             const newMessage = messageResponse.data.data.message;
 
             // Upload images if any
-            for (const imageFile of selectedImages) {
+            for (const image of selectedImages) {
                 try {
-                    await ticketAPI.uploadImage(id, newMessage.id, imageFile);
+                    await ticketAPI.uploadImage(id, newMessage.id, image.file);
                 } catch (imgError) {
                     console.error('Image upload error:', imgError);
                     setMessageError('Message sent but some images failed to upload');
@@ -221,7 +232,10 @@ const TicketDetail = () => {
 
             // Clear form
             setMessageContent('');
-            setSelectedImages([]);
+            setSelectedImages(prev => {
+                prev.forEach(img => URL.revokeObjectURL(img.previewUrl));
+                return [];
+            });
             setMessageError('');
         } catch (error) {
             setMessageError('Failed to send message');
@@ -562,10 +576,10 @@ const TicketDetail = () => {
                                     {/* Selected images preview */}
                                     {selectedImages.length > 0 && (
                                         <div className="image-preview">
-                                            {selectedImages.map((file, index) => (
+                                            {selectedImages.map((image, index) => (
                                                 <div key={index} className="image-preview-item">
                                                     <img
-                                                        src={URL.createObjectURL(file)}
+                                                        src={image.previewUrl}
                                                         alt={`Preview ${index}`}
                                                         className="image-preview-img"
                                                     />
