@@ -7,32 +7,47 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Attachments Table Migration
+     * Ticket Images Table Migration
      *
-     * Stores files attached to ticket messages.
-     * Each message can have at most one attachment.
-     * Both a public URL and the raw storage path are kept so the file
-     * can be served through the API or accessed directly on disk.
+     * Stores images uploaded within ticket messages.
+     * Each message can have at most one image.
+     * Stores both original and thumbnail file references.
+     *
+     * Columns match TicketService::uploadImage() which writes:
+     *   message_id, original_filename, stored_filename, mime_type,
+     *   file_size, thumbnail_filename, original_path, thumbnail_path,
+     *   width, height
      */
     public function up(): void
     {
-        Schema::create('attachments', function (Blueprint $table) {
-            $table->id('attachment_id');
+        Schema::create('ticket_images', function (Blueprint $table) {
+            $table->id();
 
             $table->foreignId('message_id')
-                ->constrained('messages', 'message_id')
+                ->constrained('ticket_messages')
                 ->onDelete('cascade');
 
-            $table->string('file_name');
-            $table->string('url', 500);
-            $table->string('mime_type', 100);
-            $table->unsignedInteger('size_bytes');
-            $table->string('original_path', 500);
+            // Original filename as uploaded by the user
+            $table->string('original_filename');
 
-            $table->timestamp('created_at')->useCurrent();
+            // Secure server-side filename (unique)
+            $table->string('stored_filename');
+
+            $table->string('mime_type', 100);
+            $table->unsignedBigInteger('file_size'); // in bytes
+
+            // Thumbnail (nullable: generated asynchronously)
+            $table->string('thumbnail_filename')->nullable();
+            $table->string('original_path', 500);
+            $table->string('thumbnail_path', 500)->nullable();
+
+            // Image dimensions in pixels
+            $table->unsignedInteger('width')->nullable();
+            $table->unsignedInteger('height')->nullable();
+
+            $table->timestamps();
 
             $table->index('message_id');
-            $table->index('created_at');
         });
     }
 
@@ -41,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attachments');
+        Schema::dropIfExists('ticket_images');
     }
 };

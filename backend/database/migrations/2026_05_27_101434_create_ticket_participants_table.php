@@ -21,7 +21,7 @@ return new class extends Migration
     {
         Schema::create('ticket_participants', function (Blueprint $table) {
             $table->foreignId('ticket_id')
-                ->constrained('tickets', 'ticket_id')
+                ->constrained('tickets')
                 ->onDelete('cascade');
 
             $table->foreignId('user_id')
@@ -30,8 +30,9 @@ return new class extends Migration
 
             $table->enum('role', ['creator', 'assigned', 'viewer'])->default('viewer');
 
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
 
+            // Composite PK: one row per (ticket, user) pair
             $table->primary(['ticket_id', 'user_id']);
             $table->index('ticket_id');
             $table->index('user_id');

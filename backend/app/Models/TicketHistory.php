@@ -24,6 +24,11 @@ class TicketHistory extends Model
     use HasFactory;
 
     /**
+     * Explicit table name — Laravel would pluralise to 'ticket_histories'
+     */
+    protected $table = 'ticket_history';
+
+    /**
      * Mass assignable attributes
      *
      * @var array<int, string>

@@ -14,33 +14,28 @@ return new class extends Migration
      * from creation (draft) through to resolution (closed).
      *
      * Lifecycle: draft -> open -> in_progress -> pending_info -> resolved -> closed
-     *
-     * Assignment is handled by the ticket_admins pivot table (one ticket
-     * can have multiple assigned admins).  The legacy single-column
-     * "assigned_to" has been removed in favour of that pivot.
      */
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id('ticket_id');
+            $table->id();
 
             // Creator
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->onDelete('restrict');
 
-            // Normalised category (nullable to allow a grace period for old data)
-            $table->foreignId('category_id')
+            // Admin/support staff assigned to the ticket (nullable)
+            $table->foreignId('assigned_to')
                 ->nullable()
-                ->constrained('categories')
+                ->constrained('users')
                 ->onDelete('set null');
-
-            // Keeps the raw category string from before normalisation
-            $table->string('category_legacy', 100)->nullable();
 
             $table->string('title');
             $table->text('description');
-            $table->string('subject', 255)->nullable();
+
+            // Raw category string (e.g. 'general', 'it', 'security')
+            $table->string('category', 100)->default('general');
 
             $table->enum('status', [
                 'draft',
@@ -58,18 +53,11 @@ return new class extends Migration
                 'critical',
             ])->default('medium');
 
-            // Admin who closed the ticket
-            $table->foreignId('closed_by')
-                ->nullable()
-                ->constrained('users')
-                ->onDelete('set null');
-
             $table->timestamps();
-            $table->timestamp('closed_at')->nullable();
 
             // Indexes for common queries
             $table->index('user_id');
-            $table->index('category_id');
+            $table->index('assigned_to');
             $table->index('status');
             $table->index('priority');
             $table->index('created_at');
