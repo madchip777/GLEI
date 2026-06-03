@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Ticket;
 use App\Models\TicketMessage;
+use App\Models\TicketImage;
 use App\Services\TicketService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Ticket Controller
@@ -154,7 +155,8 @@ class TicketController
             // Find ticket
             $ticket = Ticket::with([
                 'messages' => function ($query) {
-                $query->with('user', 'image')->orderBy('created_at', 'asc');
+                    Log::info('Loading messages with images relationship');
+                    $query->with('user', 'images')->orderBy('created_at', 'asc');
                 },
                 'history' => function ($query) {
                     $query->orderBy('created_at', 'desc');
@@ -162,8 +164,11 @@ class TicketController
                 'creator'
             ])->findOrFail($id);
 
+            Log::info('Ticket loaded successfully', ['ticket_id' => $ticket->id]);
+
             // Check access
             if (!$ticket->canAccess($request->user())) {
+                Log::warning('Access denied to ticket', ['ticket_id' => $id, 'user_id']);
                 return response()->json([
                     'success' => false,
                     'message' => 'You do not have access to this ticket',
@@ -190,12 +195,20 @@ class TicketController
             ], 200);
 
         } catch (ModelNotFoundException $exception) {
+            Log::error('Ticket not found', ['id' => $id]);
             return response()->json([
                 'success' => false,
                 'message' => 'Ticket not found',
             ], 404);
 
         } catch (Exception $exception) {
+            Log::error('Error fetching ticket', [
+                'id' => $id,
+                'error' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching ticket',
@@ -386,39 +399,59 @@ class TicketController
     }
 
     /**
-     * View image (with access control)
+     * View a specific image by ID
+     * Auth-protected: token required, never in URL
      */
-    public function viewImage(Request $request, int $id, int $msgId)
+    public function  viewImageById(Request $request, int $ticketId, int $imageId)
     {
         try {
-            $ticket = Ticket::findOrFail($id);
+            $image = TicketImage::findOrFail($imageId);
+            $message = $image->message;
+            $ticket = $message->ticket;
 
-            // Check if user has access
-            if (!$ticket->canAccess($request->user())) {
-                abort(403, 'Unauthorized');
+            // Verify the image belongs to the ticket
+            if ($ticket->id != $ticketId) {
+                return response()->json(
+                    ['message' => 'Image not found'],
+                    404
+                );
             }
 
-            // Get message and image
-            $message = TicketMessage::where('id', $msgId)
-                ->where('ticket_id', $id)
-                ->firstOrFail();
-
-            $image = $message->image;
-            if (!$image) {
-                abort(404, 'Image not found');
+            // Check access
+            if (!$ticket->canAccess($request->user())) {
+                return response()->json(
+                    ['message' => 'access denied'],
+                    403
+                );
             }
 
             $imageStoragePath = env('IMAGE_STORAGE_PATH');
-            $path = $imageStoragePath . DIRECTORY_SEPARATOR . $image->original_path;
+            $fullPath = $imageStoragePath . DIRECTORY_SEPARATOR . $image->original_path;
 
-            if (!file_exists($path)) {
-                abort(404, 'File not found');
+            if (!file_exists($fullPath)) {
+                Log::error('Image not found', ['path' => $fullPath]);
+                return response()->json(
+                    ['message' => 'Image not found'],
+                    404
+                );
             }
 
-            return response()->file($path);
-
-        } catch (\Exception $e) {
-            abort(404);
+            return response()->file($fullPath, [
+                'Content-Type' => $image->mime_type,
+            ]);
+        } catch (ModelNotFoundException $exception) {
+            return response()->json(
+                ['message' => 'Image not found'],
+                404
+            );
+        } catch (Exception $exception) {
+            Log::error('Error serving image',
+                ['error' => $exception->getMessage()],
+            );
+            return response()->json(
+                ['message' => 'Error serving image'],
+                500
+            );
         }
     }
 }

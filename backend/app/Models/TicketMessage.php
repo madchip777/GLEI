@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * TicketMessage Model
@@ -34,6 +33,7 @@ class TicketMessage extends Model
         'user_id',
         'content',
         'type',
+        'created_at',
     ];
 
     /**
@@ -41,6 +41,7 @@ class TicketMessage extends Model
      * Message never change after creation
      */
     public $timestamps = false;
+    protected $casts = ['created_at'];
 
     /**
      * Only created_at timestamp
@@ -66,8 +67,8 @@ class TicketMessage extends Model
     /**
      * Relationship: Message has one image attachment (optional)
      */
-    public function image()
+    public function images()
     {
-        return $this->hasOne(TicketImage::class, 'message_id');
+        return $this->hasMany(TicketImage::class, 'message_id');
     }
 }

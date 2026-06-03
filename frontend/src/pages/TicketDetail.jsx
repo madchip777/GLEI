@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { ticketAPI } from "../services/api.js";
-import { fetchImageAsBlob, fetchThumbnailAsBlob } from "../services/imageService.js";
+import { fetchThumbnailById } from "../services/imageService.js";
 import Navbar from "../components/Navbar.jsx";
 import '../styles/tickets.css';
 import '../styles/common.css';
@@ -126,20 +126,36 @@ const TicketDetail = () => {
      */
     useEffect(() => {
         const loadImages = async () => {
-            const urls = {};
+            const urls = { ...imageDataUrls};
+            let hasNewImages = false;
 
             for (const message of messages) {
-                if (message.image) {
-                    try {
-                        const dataUrl = await fetchThumbnailAsBlob(id, message.id);
-                        urls[message.id] = dataUrl;
-                    } catch (err) {
-                        console.error('Failed to load thumbnail:', err);
+                if (message.images && message.images.length > 0) {
+                    if (!urls[message.id]) {
+                        urls[message.id] = [];
+                    }
+
+                    for (const image of message.images) {
+                        const alreadyLoaded = urls[message.id].some(u => u.id === image.id);
+                        if (alreadyLoaded) continue;
+
+                        try {
+                            const dataUrl = await fetchThumbnailById(id, image.id);
+                            urls[message.id].push({
+                                id: image.id,
+                                dataUrl: dataUrl,
+                            });
+                            hasNewImages = true;
+                        } catch (error) {
+                            console.error('Failed to load thumbnail', error);
+                        }
                     }
                 }
             }
 
-            setImageDataUrls(urls);
+            if (hasNewImages) {
+                setImageDataUrls(urls);
+            }
         };
 
         if (messages.length > 0) {
@@ -152,7 +168,22 @@ const TicketDetail = () => {
      */
     const handleImageSelect = (e) => {
         const files = Array.from(e.target.files);
-        const newImages = files.map(file => ({
+        const MAX_IMAGES = 5;
+        const remainingSlots = MAX_IMAGES - selectedImages.length;
+
+        if (remainingSlots <= 0) {
+            setMessageError(`Maximum ${MAX_IMAGES} images per message reached`);
+            e.target.value = '';
+            return;
+        }
+
+        const filesToAdd = files.slice(0, remainingSlots);
+
+        if (files.length > remainingSlots) {
+            setMessageError(`Only ${remainingSlots} more image(s) can be added (max ${MAX_IMAGES} per message)`);
+        }
+
+        const newImages = filesToAdd.map(file => ({
             file,
             previewUrl: URL.createObjectURL(file),
         }));
@@ -180,7 +211,22 @@ const TicketDetail = () => {
 
         const files = Array.from(e.dataTransfer.files);
         const imageFiles = files.filter(f => f.type.startsWith('image/'));
-        const newImages = imageFiles.map(file => ({
+
+        const MAX_IMAGES = 5;
+        const remainingSlots = MAX_IMAGES - selectedImages.length;
+
+        if (remainingSlots <= 0) {
+            setMessageError(`Maximum ${MAX_IMAGES} images per message reached`);
+            return;
+        }
+
+        const filesToAdd = imageFiles.slice(0, remainingSlots);
+
+        if (imageFiles.length > remainingSlots) {
+            setMessageError(`Only ${remainingSlots} more image(s) can be added (max ${MAX_IMAGES} per message)`);
+        }
+
+        const newImages = filesToAdd.map(file => ({
             file,
             previewUrl: URL.createObjectURL(file),
         }));
@@ -259,14 +305,11 @@ const TicketDetail = () => {
     };
 
     /**
-     * View image securely with auth
-     */
-    /**
      * View original image securely with auth
      */
     const handleViewImage = async (image) => {
         try {
-            const dataUrl = await fetchImageAsBlob(id, image.message_id);
+            const dataUrl = await fetchThumbnailById(id, image.id);
             const win = window.open('', '_blank');
 
             const img = win.document.createElement('img');
@@ -332,7 +375,12 @@ const TicketDetail = () => {
                 is_admin: user?.role === 'admin',
                 is_super_admin: user?.role === 'super_admin',
                 is_not_closed: ticket.status !== 'closed',
-                should_show_form: (user?.id === ticket.user_id || user?.role === 'admin' || user?.role === 'super_admin') && ticket.status !== 'closed'
+                should_show_form: (
+                    user?.id === ticket.user_id
+                    || user?.role === 'admin'
+                    || user?.role === 'super_admin'
+                ) && ticket.status !== 'closed'
+                && ticket.status !== 'draft'
             });
         }
     }, [ticket, user]);
@@ -488,16 +536,20 @@ const TicketDetail = () => {
                                                 </div>
 
                                                 {/* Image attachement - if message has an image */}
-                                                {message.image && (
-                                                    <div className="message-image">
-                                                        <img
-                                                            src={imageDataUrls[message.id]}
-                                                            alt="Attachment"
-                                                            className="message-image-thumbnail"
-                                                            onClick={() => handleViewImage(message.image)}
-                                                            title="Click to view original image"
-                                                            style={{ cursor: 'pointer' }}
-                                                        />
+                                                {message.images && message.images.length > 0 && (
+                                                    <div className="message-images" style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                        {message.images.map((image, imgIndex) => (
+                                                            <div key={image.id} className="message-image" style={{ position: 'relative' }}>
+                                                                <img
+                                                                    src={imageDataUrls[message.id]?.[imgIndex]?.dataUrl}
+                                                                    alt={`Attachment ${imgIndex + 1}`}
+                                                                    className="message-image-thumbnail"
+                                                                    onClick={() => handleViewImage(image, message.id)}
+                                                                    title="Click to view original image"
+                                                                    style={{ cursor: 'pointer', maxWidth: '150px' }}
+                                                                />
+                                                            </div>
+                                                        ))}
                                                     </div>
                                                 )}
                                             </div>
@@ -521,8 +573,12 @@ const TicketDetail = () => {
                 </div>
 
                 {/* Message Form */}
-                {(user?.id === ticket.user_id || user?.role === 'admin' || user?.role === 'super_admin') &&
-                    ticket.status !== 'closed' && (
+                {(
+                    user?.id === ticket.user_id ||
+                    user?.role === 'admin' ||
+                    user?.role === 'super_admin') &&
+                    ticket.status !== 'closed' &&
+                    ticket.status !== 'draft' && (
                         <div className="message-form" style={{ marginTop: '2rem' }}>
                             <h3 style={{ color: '#34495e', marginBottom: '1rem' }}>
                                 Add Message
@@ -575,24 +631,29 @@ const TicketDetail = () => {
 
                                     {/* Selected images preview */}
                                     {selectedImages.length > 0 && (
-                                        <div className="image-preview">
-                                            {selectedImages.map((image, index) => (
-                                                <div key={index} className="image-preview-item">
-                                                    <img
-                                                        src={image.previewUrl}
-                                                        alt={`Preview ${index}`}
-                                                        className="image-preview-img"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeImage(index)}
-                                                        className="image-preview-remove"
-                                                        title="Remove"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            ))}
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <p style={{ fontSize: '0.85rem', color: '#7f8c8d', marginBottom: '0.5rem' }}>
+                                                Selected images: {selectedImages.length}/5
+                                            </p>
+                                            <div className="image-preview">
+                                                {selectedImages.map((image, index) => (
+                                                    <div key={index} className="image-preview-item">
+                                                        <img
+                                                            src={image.previewUrl}
+                                                            alt={`Preview ${index}`}
+                                                            className="image-preview-img"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(index)}
+                                                            className="image-preview-remove"
+                                                            title="Remove"
+                                                        >
+                                                            X
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>

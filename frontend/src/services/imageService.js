@@ -1,40 +1,33 @@
 import axios from 'axios';
 
-/**
- * Fetch image with authentication
- * Returns blob URL for display
- */
-export const fetchImageAsBlob = async (ticketId, messageId) => {
-    try {
-        // Get token from sessionStorage
-        const token = sessionStorage.getItem('access_token');
-
-        const response = await axios.get(
-            `http://localhost:8000/api/tickets/${ticketId}/messages/${messageId}/image/view`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                responseType: 'blob'
-            }
-        );
-
-        // Convert blob to data URL for display
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(response.data);
-        });
-    } catch (error) {
-        console.error('Failed to fetch image:', error);
-        throw error;
-    }
-};
+const BASE_URL = 'http://localhost:8000/api';
 
 /**
- * Fetch thumbnail as blob
+ * Fetch a specific image by image ID
+ * Secure: token only sent via Authorization header
  */
-export const fetchThumbnailAsBlob = async (ticketId, messageId) => {
-    return fetchImageAsBlob(ticketId, messageId);
+const fetchImageById = async (ticketId, imageId) => {
+    const token = sessionStorage.getItem('access_token');
+
+    const response = await axios.get(
+        `${BASE_URL}/tickets/${ticketId}/images/${imageId}/view`,
+        {
+            headers: { 'Authorization': `Bearer ${token}` },
+            responseType: 'blob'
+        }
+    );
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(response.data);
+    });
+}
+
+/**
+ * Fetch thumbnail by image ID
+ */
+export const fetchThumbnailById = async (ticketId, imageId) => {
+    return fetchImageById(ticketId, imageId);
 };
