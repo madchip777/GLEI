@@ -14,8 +14,9 @@ const AuthContext = createContext(null);
 /**
  * AuthProvider Component
  *
- * Wraps the application to provide authentication context.
- * Handles token management, login/logout, and session persistence.
+ * Manages user session, token (access and refresh), and role-based access.
+ * Tokens stored in sessionStorage (cleared on browser close).
+ * Login is split: credentials -> 2FA -> completeLogin()
  *
  * @param {Object} props
  * @param {React.ReactNode} props.children - Child components
@@ -60,58 +61,38 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     /**
-     * Login user with email and password
+     * Complete login after successful 2FA verification
+     * Called by Login.jsx after 2FA confirm or verify succeeds
      *
-     * Authenticates user and stores tokens in both states and sessionStorage.
-     * Returns access token, refresh token, and user info.
-     *
-     * @param {string} email - USer email address
-     * @param {string} password - User password
-     * @returns {Promise<{success: boolean, massage?: string}>}
+     * @param {Object} userData - User object from API
+     * @param {string} accessToken - Access token
+     * @param {string} refreshToken - Refresh token
+     * @returns {{success: boolean, message?: string}}
      */
-    const login = async (email, password) => {
+    const completeLogin = (userData, accessToken, refreshToken) => {
         try {
-            const response = await authAPI.login(email, password);
+            setAccessToken(accessToken);
+            setRefreshToken(refreshToken);
+            setUser(userData);
 
-            if (response.data.success) {
-                const { access_token, refresh_token, user } = response.data.data;
+            sessionStorage.setItem("access_token", accessToken);
+            sessionStorage.setItem("refresh_token", refreshToken);
+            sessionStorage.setItem("user", JSON.stringify(userData));
 
-                console.log('Login successful:', {
-                    access_token: access_token.substring(0, 15) + '...',
-                    refresh_token: refresh_token.substring(0, 15) + '...',
-                    user: user
-                });
-
-                // Update state
-                setAccessToken(access_token);
-                setRefreshToken(refresh_token);
-                setUser(user);
-
-                // Persist to sessionStorage (cleared on browser close)
-                sessionStorage.setItem('access_token', access_token);
-                sessionStorage.setItem('refresh_token', refresh_token);
-                sessionStorage.setItem("user", JSON.stringify(user));
-
-                console.log('🔍 Stored in sessionStorage:', {
-                    access_token: sessionStorage.getItem('access_token'),
-                    refresh_token: sessionStorage.getItem('refresh_token'),
-                    user: sessionStorage.getItem('user')
-                });
-
-                return { success: true };
-            }
-
-            return {
-                success: false,
-                message: response.data.message || 'Login failed',
-            };
-
+            return { success: true };
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Failed to store session:', error);
+            // Clear any partial state
+            setAccessToken(null);
+            setRefreshToken(null);
+            setUser(null);
+            sessionStorage.clear();
+
             return {
                 success: false,
-                message: error.response?.data?.message || 'Login error',
+                message: 'Failed to initialize session. Please try again.',
             };
+
         }
     };
 
@@ -136,7 +117,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     /**
-     * Chack if user has specific role(s)
+     * Check if user has specific role(s)
      *
      * @param {string|string[]} roles - Role or array of roles to check
      * @returns {boolean} True if user has one of the specified roles
@@ -158,7 +139,7 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         refreshToken,
         loading,
-        login,
+        completeLogin,
         logout,
         isAuthenticated: !!accessToken || !!sessionStorage.getItem('access_token'),
         hasRole,
@@ -179,7 +160,7 @@ export const AuthProvider = ({ children }) => {
  * @example
  * const { user, login, logout, isAuthenticated } = useAuth();
  */
-export const  useAuth = () => {
+export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
         throw new Error('useAuth must be used within a AuthProvider');

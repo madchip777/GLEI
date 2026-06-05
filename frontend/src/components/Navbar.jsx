@@ -91,7 +91,7 @@ const Navbar = () => {
 
                     {/* Tickets link - visible to all authenticated users */}
                     <Link to="/tickets" className="navbar-link">
-                        🎫 Tickets
+                        Tickets
                     </Link>
 
                     {/* Admin link - visible to admin and super_admin */}
@@ -107,6 +107,11 @@ const Navbar = () => {
                             Super Admin
                         </Link>
                     )}
+
+                    {/* Settings link - visible to all authenticated users */}
+                    <Link to="/settings" className="navbar-link">
+                        Settings
+                    </Link>
                 </div>
             </div>
 

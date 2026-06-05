@@ -201,6 +201,37 @@ export const authAPI = {
     getCurrentUser: () => api.get('/user'),
 };
 
+/**
+ * 2FA API calls
+ */
+export const twoFactorAPI = {
+    /**
+     * Get QR code for 2FA setup
+     */
+    getSetup: (setupToken) =>
+        api.get('/2fa/setup', {
+            headers: { 'X-Setup-Token': setupToken },
+        }),
+
+    /**
+     * Confirm 2FA setup with first code
+     */
+    confirmSetup: (setupToken, code) =>
+        api.post('/2fa/confirm',
+            { code },
+            { headers: { 'X-Setup-Token': setupToken } }
+        ),
+
+    /**
+     * Verify 2FA  code on login
+     */
+    verify: (tempToken, code) =>
+        api.post('/2fa/verify',
+            {code},
+            { headers: { 'X-Temp-Token': tempToken }}
+            )
+};
+
 // Dashboard API calls
 export const dashboardAPI = {
     /**

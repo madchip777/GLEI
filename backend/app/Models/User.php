@@ -22,6 +22,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property \Carbon\Carbon $email_verified_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @property string|null $two_factor_secret Encrypted TOTP secret
+ * @property \Carbon\Carbon|null $two_factor_confirmed_at When 2FA was confirmed
+ * @property bool $force_password_change Must change password on next login
  */
 class User extends Authenticatable
 {
@@ -37,6 +40,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'two_factor_secret',
+        'two_factor_confirmed_at',
+        'force_password_change',
     ];
 
     /**
@@ -49,6 +55,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
     ];
 
     /**
@@ -61,8 +68,28 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'two_factor_confirmed_at' => 'datetime',
+        'force_password_change' => 'boolean',
         'password' => 'hashed',
     ];
+
+    // 2FA checks
+
+    /**
+     * Check if user has completed 2FA setup
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_confirmed_at !== null;
+    }
+
+    /**
+     * Check if user needs to set up 2FA
+     */
+    public function needsTwoFactorSetup(): bool
+    {
+        return $this->two_factor_secret === null || $this->two_factor_confirmed_at === null;
+    }
 
     // === Role Checks ===
 

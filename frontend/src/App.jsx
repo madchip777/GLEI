@@ -9,6 +9,7 @@ import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import Tickets from './pages/Tickets.jsx';
 import CreateTicket from './pages/CreateTicket.jsx';
 import TicketDetail from './pages/TicketDetail.jsx';
+import Settings from "./pages/Settings.jsx";
 
 /**
  * Main App Component
@@ -69,7 +70,7 @@ function App() {
                       </PrivateRoute>
                   }
               />
-
+              <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
               {/* Protected routes - Admin and Super Admin only */}
             <Route
                 path="/admin"

@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\TicketController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserDashboardController;
@@ -19,6 +19,13 @@ use App\Http\Controllers\Api\SuperAdminController;
  */
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
+
+/**
+ * === Semi-public 2FA routes ===
+ */
+Route::post('/2fa/verify', [TwoFactorController::class, 'verify']);
+Route::post('/2fa/confirm', [TwoFactorController::class, 'confirm']);
+Route::get('/2fa/setup', [TwoFactorController::class, 'setup']);
 
 /**
  * === Protected Routes (authentification required) ===

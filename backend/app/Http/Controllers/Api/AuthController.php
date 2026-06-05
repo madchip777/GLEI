@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Authentication Controller
@@ -44,7 +46,8 @@ class AuthController extends Controller
      * Login Endpoint
      *
      * Authenticates  user with email and password.
-     * Returns access token, refresh token, and user data.
+     * If 2FA not set yp: returns setup_token for 2FA enrollment.
+     * If 2FA set up: returns temp_token for TOTP verification
      */
     public function login(Request $request): JsonResponse
     {
@@ -61,22 +64,36 @@ class AuthController extends Controller
                 $validated['password']
             );
 
-            // return successes response with tokens
+            $user = $result['user'];
+            Log::info('User logged in', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip' => $request->ip(),
+                'timestamp' => now()->toDateTimeString(),
+            ]);
+
+            // 2FA not yet set up -> send to setup flow
+            if ($user->needsTwoFactorSetup()) {
+                $setupToken = Str::random(64);
+                Cache::put('2fa_setup_' . $setupToken, $user->id, now()->addMinutes(15));
+
+                return response()->json([
+                    'success' => true,
+                    'requires_2fa_setup' => true,
+                    'setup_token' => $setupToken,
+                    'message' => 'Please set up two-factor authentication',
+                ], 200);
+            }
+
+            // 2FA set up -> require TOTP code
+            $tempToken = Str::random(64);
+            Cache::put('2fa_temp_' . $tempToken, $user->id, now()->addMinutes(15));
+
             return response()->json([
                 'success' => true,
-                'message' => 'Connexion réussie',
-                'data' => [
-                    'user' => [
-                        'id' => $result['user']->id,
-                        'name' => $result['user']->name,
-                        'email' => $result['user']->email,
-                        'role' => $result['user']->role,
-                    ],
-                    'access_token' => $result['access_token'],
-                    'refresh_token' => $result['refresh_token'],
-                    'token_type' => 'Bearer',
-                    'expires_in' => $result['expires_in'],
-                ],
+                'requires_2fa' => true,
+                'temp_token' => $tempToken,
+                'message' => 'Please enter your authenticator code',
             ], 200);
         } catch (ValidationException $exception) {
             return response()->json([
