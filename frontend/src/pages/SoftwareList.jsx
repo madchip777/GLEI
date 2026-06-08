@@ -5,6 +5,58 @@ import '../styles/admin.css';
 import '../styles/common.css';
 
 /**
+ * Software form fields - defined outside component to prevent re-render focus loss
+ */
+const SoftwareFormFields = ({ form, setForm, formErrors, disabled }) => (
+    <>
+        <div className="form-group">
+            <label className="form-label">Name *</label>
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                   className="form-input" placeholder="Microsoft Office 365" required disabled={disabled} />
+            {formErrors.name && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.name[0]}</p>}
+        </div>
+        <div className="form-group">
+            <label className="form-label">Category *</label>
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+                    className="form-select" disabled={disabled}>
+                {['os','office_suite','antivirus','business'].map(c => (
+                    <option key={c} value={c}>{c.replace('_', ' ')}</option>
+                ))}
+            </select>
+        </div>
+        <div className="form-group">
+            <label className="form-label">Version</label>
+            <input value={form.version} onChange={e => setForm({ ...form, version: e.target.value })}
+                   className="form-input" placeholder="2024" disabled={disabled} />
+        </div>
+        <div className="form-group">
+            <label className="form-label">License Key</label>
+            <input value={form.license_key} onChange={e => setForm({ ...form, license_key: e.target.value })}
+                   className="form-input" placeholder="XXXXX-XXXXX-XXXXX" disabled={disabled} />
+        </div>
+        <div className="form-group">
+            <label className="form-label">License Expiry</label>
+            <input type="date" value={form.license_expiry} onChange={e => setForm({ ...form, license_expiry: e.target.value })}
+                   className="form-input" disabled={disabled} />
+        </div>
+        <div className="form-group">
+            <label className="form-label">Status *</label>
+            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
+                    className="form-select" disabled={disabled}>
+                {['active','expired','retired'].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                ))}
+            </select>
+        </div>
+        <div className="form-group">
+            <label className="form-label">Notes</label>
+            <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
+                      className="form-input" rows={2} disabled={disabled} />
+        </div>
+    </>
+);
+
+/**
  * SoftwareList Page
  *
  * Lists all software licenses with:
@@ -150,55 +202,6 @@ const SoftwareList = () => {
         return matchesStatus && matchesCategory;
     });
 
-    const FormFields = ({ disabled }) => (
-        <>
-            <div className="form-group">
-                <label className="form-label">Name *</label>
-                <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                       className="form-input" placeholder="Microsoft Office 365" required disabled={disabled} />
-                {formErrors.name && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.name[0]}</p>}
-            </div>
-            <div className="form-group">
-                <label className="form-label">Category *</label>
-                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                        className="form-select" disabled={disabled}>
-                    {['os','office_suite','antivirus','business'].map(c => (
-                        <option key={c} value={c}>{c.replace('_', ' ')}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="form-group">
-                <label className="form-label">Version</label>
-                <input value={form.version} onChange={e => setForm({ ...form, version: e.target.value })}
-                       className="form-input" placeholder="2024" disabled={disabled} />
-            </div>
-            <div className="form-group">
-                <label className="form-label">License Key</label>
-                <input value={form.license_key} onChange={e => setForm({ ...form, license_key: e.target.value })}
-                       className="form-input" placeholder="XXXXX-XXXXX-XXXXX" disabled={disabled} />
-            </div>
-            <div className="form-group">
-                <label className="form-label">License Expiry</label>
-                <input type="date" value={form.license_expiry} onChange={e => setForm({ ...form, license_expiry: e.target.value })}
-                       className="form-input" disabled={disabled} />
-            </div>
-            <div className="form-group">
-                <label className="form-label">Status *</label>
-                <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
-                        className="form-select" disabled={disabled}>
-                    {['active','expired','retired'].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="form-group">
-                <label className="form-label">Notes</label>
-                <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                          className="form-input" rows={2} disabled={disabled} />
-            </div>
-        </>
-    );
-
     return (
         <>
             <Navbar />
@@ -326,7 +329,12 @@ const SoftwareList = () => {
                             <button className="modal-close" onClick={() => setShowCreateModal(false)}>×</button>
                         </div>
                         <form onSubmit={handleSave}>
-                            <FormFields disabled={actionLoading} />
+                            <SoftwareFormFields
+                                form={form}
+                                setForm={setForm}
+                                formErrors={formErrors}
+                                disabled={actionLoading}
+                            />
                             <div className="modal-footer">
                                 <button type="button" className="btn-action secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
                                 <button type="submit" className="btn-action primary" disabled={actionLoading}>
@@ -347,7 +355,12 @@ const SoftwareList = () => {
                             <button className="modal-close" onClick={() => setEditItem(null)}>×</button>
                         </div>
                         <form onSubmit={handleSave}>
-                            <FormFields disabled={actionLoading} />
+                            <SoftwareFormFields
+                                form={form}
+                                setForm={setForm}
+                                formErrors={formErrors}
+                                disabled={actionLoading}
+                            />
                             <div className="modal-footer">
                                 <button type="button" className="btn-action secondary" onClick={() => setEditItem(null)}>Cancel</button>
                                 <button type="submit" className="btn-action primary" disabled={actionLoading}>

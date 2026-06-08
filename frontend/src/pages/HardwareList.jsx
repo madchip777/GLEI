@@ -5,6 +5,69 @@ import '../styles/admin.css';
 import '../styles/common.css';
 
 /**
+ * Hardware form fields - defined outside to prevent re-render focus loss
+ */
+const HardwareFormFields = ({ form, setForm, formErrors, disabled }) => (
+    <>
+        <div className="form-group">
+            <label className="form-label">Category *</label>
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+                    className="form-select" disabled={disabled}>
+                {['computer','laptop','monitor','peripheral','mobile_device','printer'].map(c => (
+                    <option key={c} value={c}>{c.replace('_', ' ')}</option>
+                ))}
+            </select>
+        </div>
+        <div className="form-group">
+            <label className="form-label">Brand *</label>
+            <input value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })}
+                   className="form-input" placeholder="Dell, Apple, HP..." required disabled={disabled} />
+            {formErrors.brand && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.brand[0]}</p>}
+        </div>
+        <div className="form-group">
+            <label className="form-label">Model *</label>
+            <input value={form.model} onChange={e => setForm({ ...form, model: e.target.value })}
+                   className="form-input" placeholder="XPS 15, MacBook Pro..." required disabled={disabled} />
+            {formErrors.model && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.model[0]}</p>}
+        </div>
+        <div className="form-group">
+            <label className="form-label">Serial Number *</label>
+            <input value={form.serial_number} onChange={e => setForm({ ...form, serial_number: e.target.value })}
+                   className="form-input" placeholder="SN123456" required disabled={disabled} />
+            {formErrors.serial_number && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.serial_number[0]}</p>}
+        </div>
+        <div className="form-group">
+            <label className="form-label">Purchase Date</label>
+            <input type="date" value={form.purchase_date} onChange={e => setForm({ ...form, purchase_date: e.target.value })}
+                   className="form-input" disabled={disabled} />
+        </div>
+        <div className="form-group">
+            <label className="form-label">Condition *</label>
+            <select value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}
+                    className="form-select" disabled={disabled}>
+                {['new','good','fair','poor'].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                ))}
+            </select>
+        </div>
+        <div className="form-group">
+            <label className="form-label">Status *</label>
+            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
+                    className="form-select" disabled={disabled}>
+                {['active','in_repair','in_pool','retired'].map(s => (
+                    <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                ))}
+            </select>
+        </div>
+        <div className="form-group">
+            <label className="form-label">Notes</label>
+            <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
+                      className="form-input" rows={2} disabled={disabled} />
+        </div>
+    </>
+);
+
+/**
  * HardwareList Page
  *
  * Lists all hardware items with:
@@ -160,66 +223,6 @@ const HardwareList = () => {
         return matchesStatus && matchesCategory;
     });
 
-    const FormFields = ({ disabled }) => (
-        <>
-            <div className="form-group">
-                <label className="form-label">Category *</label>
-                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                        className="form-select" disabled={disabled}>
-                    {['computer','laptop','monitor','peripheral','mobile_device','printer'].map(c => (
-                        <option key={c} value={c}>{c.replace('_', ' ')}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="form-group">
-                <label className="form-label">Brand *</label>
-                <input value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })}
-                       className="form-input" placeholder="Dell, Apple, HP..." required disabled={disabled} />
-                {formErrors.brand && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.brand[0]}</p>}
-            </div>
-            <div className="form-group">
-                <label className="form-label">Model *</label>
-                <input value={form.model} onChange={e => setForm({ ...form, model: e.target.value })}
-                       className="form-input" placeholder="XPS 15, MacBook Pro..." required disabled={disabled} />
-                {formErrors.model && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.model[0]}</p>}
-            </div>
-            <div className="form-group">
-                <label className="form-label">Serial Number *</label>
-                <input value={form.serial_number} onChange={e => setForm({ ...form, serial_number: e.target.value })}
-                       className="form-input" placeholder="SN123456" required disabled={disabled} />
-                {formErrors.serial_number && <p style={{ color: '#e74c3c', fontSize: '0.8rem' }}>{formErrors.serial_number[0]}</p>}
-            </div>
-            <div className="form-group">
-                <label className="form-label">Purchase Date</label>
-                <input type="date" value={form.purchase_date} onChange={e => setForm({ ...form, purchase_date: e.target.value })}
-                       className="form-input" disabled={disabled} />
-            </div>
-            <div className="form-group">
-                <label className="form-label">Condition *</label>
-                <select value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}
-                        className="form-select" disabled={disabled}>
-                    {['new','good','fair','poor'].map(c => (
-                        <option key={c} value={c}>{c}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="form-group">
-                <label className="form-label">Status *</label>
-                <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
-                        className="form-select" disabled={disabled}>
-                    {['active','in_repair','in_pool','retired'].map(s => (
-                        <option key={s} value={s}>{s.replace('_', ' ')}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="form-group">
-                <label className="form-label">Notes</label>
-                <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                          className="form-input" rows={2} disabled={disabled} />
-            </div>
-        </>
-    );
-
     return (
         <>
             <Navbar />
@@ -341,7 +344,12 @@ const HardwareList = () => {
                             <button className="modal-close" onClick={() => setShowCreateModal(false)}>×</button>
                         </div>
                         <form onSubmit={handleSave}>
-                            <FormFields disabled={actionLoading} />
+                            <HardwareFormFields
+                                form={form}
+                                setForm={setForm}
+                                formErrors={formErrors}
+                                disabled={actionLoading}
+                            />
                             <div className="modal-footer">
                                 <button type="button" className="btn-action secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
                                 <button type="submit" className="btn-action primary" disabled={actionLoading}>
@@ -362,7 +370,12 @@ const HardwareList = () => {
                             <button className="modal-close" onClick={() => setEditItem(null)}>×</button>
                         </div>
                         <form onSubmit={handleSave}>
-                            <FormFields disabled={actionLoading} />
+                            <HardwareFormFields
+                                form={form}
+                                setForm={setForm}
+                                formErrors={formErrors}
+                                disabled={actionLoading}
+                            />
                             <div className="modal-footer">
                                 <button type="button" className="btn-action secondary" onClick={() => setEditItem(null)}>Cancel</button>
                                 <button type="submit" className="btn-action primary" disabled={actionLoading}>

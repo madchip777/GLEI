@@ -74,8 +74,14 @@ const ChangePassword = () => {
             if (response.data.success) {
                 // Update user in context with force_password_change = false
                 const updatedUser = response.data.data.user;
-                completeLogin(updatedUser, accessToken, refreshToken);
-                navigate('/dashboard');
+
+                const result = completeLogin(updatedUser, accessToken, refreshToken);
+                if (result.success) {
+                    navigate('/dashboard');
+                } else {
+                    setError(result.message)
+                }
+
             }
         } catch (err) {
             const responseErrors = err.response?.data?.errors;

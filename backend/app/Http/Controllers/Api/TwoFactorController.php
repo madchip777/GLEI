@@ -139,6 +139,7 @@ class TwoFactorController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'force_password_change' => $user->force_password_change,
                 ],
             ]
         ]);
@@ -199,6 +200,7 @@ class TwoFactorController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'force_password_change' => $user->force_password_change,
                 ],
             ]
         ]);
@@ -211,7 +213,8 @@ class TwoFactorController extends Controller
     {
         $accessToken = $user->createToken('access-token', ['*'], now()->addMinutes(15))->plainTextToken;
 
-        $refreshToken = RefreshToken::generate($user);
+        $refreshTokenModel = RefreshToken::generate($user);
+        $refreshToken = $refreshTokenModel->plain_token;
 
         return [$accessToken, $refreshToken];
     }
