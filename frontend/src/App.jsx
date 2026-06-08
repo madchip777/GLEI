@@ -10,6 +10,14 @@ import Tickets from './pages/Tickets.jsx';
 import CreateTicket from './pages/CreateTicket.jsx';
 import TicketDetail from './pages/TicketDetail.jsx';
 import Settings from "./pages/Settings.jsx";
+import ChangePassword from "./pages/ChangePassword.jsx";
+import UserList from './pages/UserList.jsx';
+import UserProfile from './pages/UserProfile.jsx';
+import HardwareList from './pages/HardwareList.jsx';
+import SoftwareList from './pages/SoftwareList.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
+
 
 /**
  * Main App Component
@@ -32,7 +40,9 @@ function App() {
         <BrowserRouter>
           <Routes>
             {/* Public route */}
-            <Route path="/login" element={<Login />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Protected routes - All authenticated users */}
             <Route
@@ -43,6 +53,7 @@ function App() {
                   </PrivateRoute>
                 }
             />
+
               {/* Ticket Routes */}
               <Route
                   path="/tickets"
@@ -70,7 +81,36 @@ function App() {
                       </PrivateRoute>
                   }
               />
+
               <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+
+              {/* Change Password Route */}
+              <Route
+                path="/change-password"
+                element={
+                  <PrivateRoute>
+                      <ChangePassword />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                  path="/users"
+                  element={
+                      <PrivateRoute roles={['admin', 'super_admin']}>
+                          <UserList />
+                      </PrivateRoute>
+                  }
+              />
+              <Route
+                  path="/users/:id"
+                  element={
+                      <PrivateRoute roles={['admin', 'super_admin']}>
+                          <UserProfile />
+                      </PrivateRoute>
+                  }
+              />
+
               {/* Protected routes - Admin and Super Admin only */}
             <Route
                 path="/admin"
@@ -96,6 +136,12 @@ function App() {
 
             {/* 404 - Redirect to dashboard */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+              <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
+              <Route path="/users" element={<PrivateRoute roles={['admin', 'super_admin']}><UserList /></PrivateRoute>} />
+              <Route path="/users/:id" element={<PrivateRoute roles={['admin', 'super_admin']}><UserProfile /></PrivateRoute>} />
+              <Route path="/hardware" element={<PrivateRoute roles={['admin', 'super_admin']}><HardwareList /></PrivateRoute>} />
+              <Route path="/software" element={<PrivateRoute roles={['admin', 'super_admin']}><SoftwareList /></PrivateRoute>} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

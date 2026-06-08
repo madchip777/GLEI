@@ -94,13 +94,6 @@ const Navbar = () => {
                         Tickets
                     </Link>
 
-                    {/* Admin link - visible to admin and super_admin */}
-                    {(user?.role === 'admin' || user?.role === 'super_admin') && (
-                        <Link to="/admin" className="navbar-link">
-                            Admin
-                        </Link>
-                    )}
-
                     {/* Super Admin link - visible to super_admin only */}
                     {user?.role === 'super_admin' && (
                         <Link to="/super-admin" className="navbar-link">
@@ -112,6 +105,14 @@ const Navbar = () => {
                     <Link to="/settings" className="navbar-link">
                         Settings
                     </Link>
+
+                    {(user?.role === 'admin' || user?.role === 'super_admin') && (
+                        <>
+                            <Link to="/users" className="navbar-link">Users</Link>
+                            <Link to="/hardware" className="navbar-link">Hardware</Link>
+                            <Link to="/software" className="navbar-link">Software</Link>
+                        </>
+                    )}
                 </div>
             </div>
 

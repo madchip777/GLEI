@@ -97,7 +97,8 @@ class RefreshToken extends Model
         $refreshToken = self::create([
             'user_id' => $user->id,
             'token' => hash('sha256', $plainToken),
-            'expires_at' => now()->addDays(7),
+            // 'expires_at' => now()->addDays(7),
+            'expires_at' => now()->addMinutes(2),
         ]);
 
         // Attach plain text token to model (not saved to DB)

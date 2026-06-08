@@ -84,6 +84,16 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // Log every 401 visibly
+        if (error.response?.status === 401) {
+            console.warn('=== 401 INTERCEPTED ===', {
+                url: originalRequest?.url,
+                retry: originalRequest?._retry,
+                hasRefreshToken: !!sessionStorage.getItem('refresh_token'),
+                isRefreshing,
+            });
+        }
+
         // Handle 401 Unauthorized errors (expired token)
         if (error.response?.status === 401 && !originalRequest._retry) {
 
@@ -107,13 +117,14 @@ api.interceptors.response.use(
             try {
                 const refreshToken = sessionStorage.getItem('refresh_token');
 
-                console.log('🔄 Attempting token refresh with:', {
-                    refreshToken: refreshToken?.substring(0, 20) + '...',
-                    hasRefreshToken: !!refreshToken
+                console.warn('=== ATTEMPTING REFRESH ===', {
+                    hasRefreshToken: !!refreshToken,
+                    refreshTokenPreview: refreshToken?.substring(0, 20),
                 });
 
                 // No refresh token available - logout
                 if (!refreshToken) {
+                    console.error('=== NO REFRESH TOKEN - LOGGING OUT ===');
                     sessionStorage.clear();
                     window.location.href = '/login';
                     return Promise.reject(error);
@@ -127,6 +138,11 @@ api.interceptors.response.use(
                     refresh_token: refreshToken,
                 });
 
+                console.warn('=== REFRESH RESPONSE ===', {
+                    success: response.data.success,
+                    status: response.status,
+                });
+
                 if (response.data.success) {
                     const { access_token, user } = response.data.data;
 
@@ -137,15 +153,23 @@ api.interceptors.response.use(
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
                     originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
 
-                    console.log('Token refreshed successfully');
+
+                    console.warn('=== TOKEN REFRESHED SUCCESSFULLY ===');
 
                     // Process all queued requests with new token
                     processQueue(null, access_token);
 
                     return api(originalRequest);
+                } else {
+                    console.error('=== REFRESH RETURNED SUCCESS:FALSE ===', response.data);
+                    throw new Error('Refresh returned success: false');
                 }
             } catch(refreshError) {
-                console.error('Token refresh failed:', refreshError);
+                console.error('=== REFRESH FAILED ===', {
+                    message: refreshError.message,
+                    response: refreshError.response?.data,
+                    status: refreshError.response?.status,
+                });
 
                 // Reject all queued requests
                 processQueue(refreshError, null);
@@ -327,5 +351,91 @@ export const ticketAPI = {
         });
     },
 }
+
+/**
+ * Password API Endpoints
+ */
+export const passwordAPI = {
+    /**
+     * Change password (authenticated user)
+     */
+    change: (currentPassword, newPassword, newPasswordConfirmation) =>
+        api.post('/password/change', {
+            current_password: currentPassword,
+            new_password: newPassword,
+            new_password_confirmation: newPasswordConfirmation,
+        }),
+
+    /**
+     * Request new passport reset link
+     */
+    forgot: (email) => api.post('/password/forgot', { email }),
+
+    /**
+     * Reset password using token from email
+     */
+    reset: (token, newPassword, newPasswordConfirmation) =>
+        api.post('/password/reset', {
+            token,
+            new_password: newPassword,
+            new_password_confirmation: newPasswordConfirmation,
+        }),
+};
+
+/**
+ * User Management API
+ */
+export const userAPI = {
+    /**
+     * List all users
+     */
+    list: () => api.get('/users'),
+
+    /**
+     * Get single user with equipment
+     */
+    get: (id) => api.get(`/users/${id}`),
+
+    /**
+     * Get own profile
+     */
+    profile: () => api.get('/profile'),
+
+    /**
+     * Create new user
+     */
+    create: (data) => api.post('/users', data),
+
+    /**
+     * Reset user password (admin)
+     */
+    resetPassword: (id) => api.post(`/users/${id}/reset-password`),
+};
+
+/**
+ * Hardware Management API
+ */
+export const hardwareAPI = {
+    list: (filters = {}) => api.get('/hardware', { params: filters }),
+    get: (id) => api.get(`/hardware/${id}`),
+    create: (data) => api.post('/hardware', data),
+    update: (id, data) => api.put(`/hardware/${id}`, data),
+    delete: (id) => api.delete(`/hardware/${id}`),
+    assign: (id, userId) => api.post(`/hardware/${id}/assign`, { user_id: userId }),
+    unassign: (id) => api.post(`/hardware/${id}/unassign`),
+};
+
+/**
+ * Software Management API
+ */
+export const softwareAPI = {
+    list: (filters = {}) => api.get('/software', { params: filters }),
+    get: (id) => api.get(`/software/${id}`),
+    create: (data) => api.post('/software', data),
+    update: (id, data) => api.put(`/software/${id}`, data),
+    delete: (id) => api.delete(`/software/${id}`),
+    assign: (id, userId) => api.post(`/software/${id}/assign`, { user_id: userId }),
+    unassign: (id, userId) => api.post(`/software/${id}/unassign`, { user_id: userId }),
+};
 
 export default api;

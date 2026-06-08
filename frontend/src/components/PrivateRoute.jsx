@@ -14,10 +14,10 @@ import '../styles/common.css'
  * @component
  */
 const PrivateRoute = ({ children, roles }) => {
-    const { isAuthenticated, hasRole, loading } = useAuth();
+    const { isAuthenticated, hasRole, user, loading } = useAuth();
 
     /**
-     * Show loading state  while checking authentication
+     * Show loading state while checking authentication
      * Prevents flash of login page during auth initialization
      */
     if (loading) {
@@ -35,12 +35,18 @@ const PrivateRoute = ({ children, roles }) => {
         return <Navigate to="/login" replace />;
     }
 
+    /**
+     * Force password change - redirects to change-password
+     */
+    if (user?.force_password_change && window.location.pathname !== '/change-password') {
+        return <Navigate to="/change-password" replace />;
+    }
+
     if (roles && !hasRole(roles)) {
         return (
             <div className="access-denied">
                 <h2>Accès refusé</h2>
                 <p>Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
-                <p>Rôle requis: {Array.isArray(roles) ? roles.join(', ') : roles}</p>
             </div>
         );
     }

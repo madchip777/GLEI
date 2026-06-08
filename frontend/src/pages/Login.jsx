@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { authAPI, twoFactorAPI } from "../services/api.js";
 import QRCode from 'qrcode';
@@ -208,6 +208,12 @@ const Login = () => {
                 <p className="test-account-item">👤 User: user@company.com / password123</p>
                 <p className="test-account-item">🛡️ Admin: admin@company.com / password123</p>
                 <p className="test-account-item">⚡ Super Admin: superadmin@company.com / password123</p>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                <Link to="/forgot-password" style={{ color: '#3498db', fontSize: '0.85rem', textDecoration: 'none' }}>
+                    Forgot your password?
+                </Link>
             </div>
         </>
     );

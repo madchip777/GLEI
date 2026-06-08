@@ -40,6 +40,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'department',
+        'job_title',
+        'phone',
         'two_factor_secret',
         'two_factor_confirmed_at',
         'force_password_change',
@@ -73,7 +76,25 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // 2FA checks
+    /**
+     * Relationship: User has many hardware items assigned
+     */
+    public function hardware()
+    {
+        return $this->hasMany(Hardware::class, 'assigned_to');
+    }
+
+    /**
+     * Relationship: User has many software licenses assigned
+     */
+    public function software()
+    {
+        return $this->belongsToMany(Software::class, 'user_software')
+            ->withPivot('assigned_at')
+            ->withTimestamps();
+    }
+
+    // === 2FA checks ===
 
     /**
      * Check if user has completed 2FA setup

@@ -135,7 +135,7 @@ class AuthController extends Controller
     {
         Log::info('Refresh endpoint hit', [
             'has_refresh_token' => $request->has('refresh_token'),
-            'refresh_token' => $request->input('refresh_token') ? substr($request->input('refresh_token'), 0, 20) . '...' : null,
+            'refresh_token' => $request->input('refresh_token') ? substr((string) $request->input('refresh_token'), 0, 20) . '...' : null,
         ]);
 
         $validated = $request->validate([
