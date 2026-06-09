@@ -19,12 +19,14 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name'              => fake()->name(),
-            'email'             => fake()->unique()->safeEmail(),
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password'          => Hash::make('password'), // texte clair : "password"
-            'remember_token'    => Str::random(10),
-            'role'              => 'user',
+            'password' => Hash::make('password'), // texte clair : "password"
+            'remember_token' => Str::random(10),
+            'role' => 'user',
+            'material' => null,
+            'post_num' => null,
         ];
     }
 
@@ -35,7 +37,7 @@ class UserFactory extends Factory
      */
     public function unverified()
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

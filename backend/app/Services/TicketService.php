@@ -151,7 +151,7 @@ class TicketService
             throw ValidationException::withMessages([
                 'message' => ['You cannot reply  to this ticket.'],
             ]);
-        }
+        } 
 
         $message = TicketMessage::create([
             'ticket_id' => $ticket->id,
@@ -428,4 +428,23 @@ class TicketService
         // Regular users see only their own tickets
         return $this->getUserTickets($user, $perPage);
     }
+
+    /**
+     * Get history of tickets for user
+     * 
+     * @param User $user
+     * @param int $perPage
+     * 
+     * @return Paginator
+     */
+    public function getHistoryOfTickets(User $user, int $perPage = 20)
+    {
+        return TicketHistory::where('user_id', $user->id)
+            ->with('ticket', 'changedBy')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    
 }
+
