@@ -15,11 +15,15 @@ return new class extends Migration
     {
         $driver = DB::connection()->getDriverName();
 
-        Schema::table('ticket_images', function (Blueprint $table) use ($driver) {
-            if ($driver === 'mysql') {
-                $table->dropUnique(['message_id']);
+        if ($driver === 'mysql') {
+            try {
+                Schema::table('ticket_images', function (Blueprint $table) {
+                    $table->dropUnique(['message_id']);
+                });
+            } catch (\Exception $e) {
+                // Index n'existe pas, rien à faire
             }
-        });
+        }
     }
 
     public function down(): void
