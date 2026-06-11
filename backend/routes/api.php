@@ -45,7 +45,7 @@ Route::get('/test-email', function () {
  */
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
-Route::post('password/forgot', [PasswordController::class, 'forgot']);
+// Route::post('password/forgot', [PasswordController::class, 'forgot']);
 Route::post('password/reset', [PasswordController::class, 'reset']);
 
 /**

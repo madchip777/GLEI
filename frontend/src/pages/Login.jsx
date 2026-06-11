@@ -210,11 +210,11 @@ const Login = () => {
                 <p className="test-account-item">⚡ Super Admin: superadmin@company.com / password123</p>
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                <Link to="/forgot-password" style={{ color: '#3498db', fontSize: '0.85rem', textDecoration: 'none' }}>
-                    Forgot your password?
-                </Link>
-            </div>
+            {/*<div style={{ textAlign: 'center', marginTop: '1rem' }}>*/}
+            {/*    <Link to="/forgot-password" style={{ color: '#3498db', fontSize: '0.85rem', textDecoration: 'none' }}>*/}
+            {/*        Forgot your password?*/}
+            {/*    </Link>*/}
+            {/*</div>*/}
         </>
     );
 
