@@ -64,7 +64,7 @@ class TicketHistory extends Model
     }
 
     /**
-     * Relationship: History belongs to User (who made the change)
+     * Relationship: History belongs to User who made the change
      */
     public function changedBy()
     {

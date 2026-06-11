@@ -1,5 +1,4 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import '../styles/navbar.css'
 
@@ -15,54 +14,6 @@ import '../styles/navbar.css'
 const Navbar = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const [tokenExpiry, setTokenExpiry] = useState(null);
-
-    /**
-     * Calculate token expiry time (15 minutes from login)
-     * Note: In production, decode JWT to get actual expiry
-     */
-    useEffect(() => {
-        // Calculate token expiry (15 minutes from login)
-        const accessToken = sessionStorage.getItem('access_token');
-        if (accessToken) {
-            // In production, you'd decode the JWT to get actual expiry
-            // For now, we'll just track 15 minutes from page load
-            const expiryTime = new Date().getTime() + (15 * 60 * 1000); // 15 minutes
-            setTokenExpiry(expiryTime);
-        }
-    }, []);
-
-    /**
-     * Update countdown every second
-     */
-    useEffect(() => {
-        if (!tokenExpiry) return;
-
-        const interval = setInterval(() => {
-            const now = new Date().getTime();
-            const timeLeft = tokenExpiry - now;
-
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-            }
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [tokenExpiry]);
-
-    /**
-     * Calculate remaining time in MM:SS format
-     *
-     * @returns {string|null} Formatted time or null
-     */
-    const getTimeLeft = () => {
-        if (!tokenExpiry) return null;
-        const now = new Date().getTime();
-        const timeLeft = Math.max(0, tokenExpiry - now);
-        const minutes = Math.floor(timeLeft / 60000);
-        const seconds = Math.floor((timeLeft % 60000) / 1000);
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
 
     /**
      * Handle user logout
@@ -94,13 +45,6 @@ const Navbar = () => {
                         Tickets
                     </Link>
 
-                    {/* Super Admin link - visible to super_admin only */}
-                    {user?.role === 'super_admin' && (
-                        <Link to="/super-admin" className="navbar-link">
-                            Super Admin
-                        </Link>
-                    )}
-
                     {/* Settings link - visible to all authenticated users */}
                     <Link to="/settings" className="navbar-link">
                         Settings
@@ -118,13 +62,6 @@ const Navbar = () => {
 
             {/* Right section: USer info and logout */}
             <div className="navbar-right">
-                {/* Token expiration countdown */}
-                {tokenExpiry && (
-                    <span className="navbar-token-timer">
-                        Token: {getTimeLeft()}
-                    </span>
-                )}
-
                 {/* User name and role */}
                 <span className="navbar-user">
                     {user?.name} ({user?.role})

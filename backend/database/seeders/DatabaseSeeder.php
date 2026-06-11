@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\Hardware;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,6 +17,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             HardwareSeeder::class,
             SoftwareSeeder::class,
+            TicketSeeder::class,
         ]);
     }
 }

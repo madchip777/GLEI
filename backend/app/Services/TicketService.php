@@ -332,85 +332,6 @@ class TicketService
     }
 
     /**
-     * Assign ticket to admin/support staff
-     *
-     * Updates assigned_to field and adds as participant.
-     * Logs change for audit trail.
-     *
-     * @param Ticket $ticket
-     * @param User $admin Admin/support staff
-     * @param User $changedBy User making  the change
-     *
-     * @return Ticket Updated ticket
-     */
-    public function assignTicket(Ticket $ticket, User $admin, User $changedBy): Ticket
-    {
-        $oldAssignment = $ticket->assigned_to;
-
-        $ticket->update(['assigned_to' => $admin->id]);
-
-        // Add admin as participant if not already
-        TicketParticipant::firstOrCreate(
-            ['ticket_id' => $ticket->id, 'user_id' => $admin->id],
-            ['role' => 'assigned']
-        );
-
-        TicketHistory::create([
-            'ticket_id' => $ticket->id,
-            'changed_by' => $changedBy->id,
-            'action_type' => 'assigned',
-            'created_at' => now(),
-            'old_values' => ['assigned_to' => $oldAssignment],
-            'new_values' => ['assigned_to' => $admin->id],
-        ]);
-
-        Log::info('Ticket assigned', [
-            'ticket_id' => $ticket->id,
-            'assigned_to' => $admin->id,
-        ]);
-
-        return $ticket;
-    }
-
-    /**
-     * Update ticket status
-     *
-     * Changes status and logs history.
-     * Only admins can change status (except creator submitting).
-     *
-     * @param Ticket $ticket
-     * @param string $newStatus New status value
-     * @param User $changedBy User making the change
-     *
-     * @return Ticket Updated ticket
-     */
-    public function updateStatus(Ticket $ticket, string $newStatus, User $changedBy): Ticket
-    {
-        $oldStatus = $ticket->status;
-
-        // Update status
-        $ticket->update(['status' => $newStatus]);
-
-        // Log change
-        TicketHistory::create([
-            'ticket_id' => $ticket->id,
-            'changed_by' => $changedBy->id,
-            'action_type' => 'status_changed',
-            'created_at' => now(),
-            'old_values' => ['status' => $oldStatus],
-            'new_values' => ['status' => $newStatus],
-        ]);
-
-        Log::info('Ticket status changed', [
-            'ticket_id' => $ticket->id,
-            'old_status' => $oldStatus,
-            'new_status' => $newStatus,
-        ]);
-
-        return $ticket;
-    }
-
-    /**
      * Get ticket history for user
      *
      * Returns paginated list of tickets created by the user.
@@ -451,5 +372,160 @@ class TicketService
 
         // Regular users see only their own tickets
         return $this->getUserTickets($user, $perPage);
+    }
+
+    /**
+     * Assign ticket to an admin
+     * Auto-adds admin as participant
+     *
+     * @param Ticket $ticket
+     * @param User $admin Admin being assigned
+     * @param User $assignedBy Who is doing the assignment
+     * @return Ticket
+     */
+    public function assignTicket(Ticket $ticket, User $admin, User $assignedBy): Ticket
+    {
+        $oldValues = ['assigned_to' => $ticket->assigned_to];
+
+        $ticket->update([
+            'assigned_to' => $admin->id,
+            'status' => $ticket->status === 'open' ? 'in_progress' : $ticket->status,
+        ]);
+
+        // Auto-add admin as participant
+        $this->addParticipant($ticket, $admin, 'assigned');
+
+        // Record history
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'changed_by' => $assignedBy->id,
+            'action_type' => 'assigned',
+            'old_values' => $oldValues,
+            'new_values' => ['assigned_to' => $admin->id],
+            'created_at' => now(),
+        ]);
+
+        Log::info('Ticket assigned', [
+            'ticket_id' => $ticket->id,
+            'assigned_to' => $admin->id,
+            'assigned_by' => $assignedBy->id,
+        ]);
+
+        return $ticket->fresh(['creator', 'assignedTo', 'participants.user']);
+    }
+
+    /**
+     * Update ticket status
+     *
+     * @param Ticket $ticket
+     * @param string $status New status
+     * @param User $changedBy Who changed the status
+     * @return Ticket
+     */
+    public function updateStatus(Ticket $ticket, string $status, User $changedBy): Ticket
+    {
+        $oldStatus = $ticket->status;
+
+        $ticket->update(['status' => $status]);
+
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'changed_by' => $changedBy->id,
+            'action_type' => 'status_changed',
+            'old_values' => ['status' => $oldStatus],
+            'new_values' => ['status' => $status],
+            'created_at' => now(),
+        ]);
+
+        Log::info('Ticket status updated', [
+            'ticket_id' => $ticket->id,
+            'old_status' => $oldStatus,
+            'new_status' => $status,
+            'changed_by' => $changedBy->id,
+        ]);
+
+        return $ticket->fresh();
+    }
+
+    /**
+     * Update ticket priority
+     *
+     * @param Ticket $ticket
+     * @param string $priority New priority
+     * @param User $changedBy Who changed the priority
+     * @return Ticket
+     */
+    public function updatePriority(Ticket $ticket, string $priority, User $changedBy): Ticket
+    {
+        $oldPriority = $ticket->priority;
+
+        $ticket->update(['priority' => $priority]);
+
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'changed_by' => $changedBy->id,
+            'action_type' => 'priority_changed',
+            'old_values' => ['priority' => $oldPriority],
+            'new_values' => ['priority' => $priority],
+            'created_at' => now(),
+        ]);
+
+        Log::info('Ticket priority updated', [
+            'ticket_id' => $ticket->id,
+            'old_priority' => $oldPriority,
+            'new_priority' => $priority,
+            'changed_by' => $changedBy->id,
+        ]);
+
+        return $ticket->fresh();
+    }
+
+    /**
+     * Add participant to ticket
+     * Prevents duplicate participants
+     *
+     * @param Ticket $ticket
+     * @param User $user User to add
+     * @param string $role creator|assigned|viewer
+     */
+    public function addParticipant(Ticket $ticket, User $user, string $role = 'viewer'): void
+    {
+        $exists = TicketParticipant::where('ticket_id', $ticket->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if (!$exists) {
+            TicketParticipant::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => $user->id,
+                'role' => $role,
+            ]);
+
+            Log::info('Participant added to ticket', [
+                'ticket_id' => $ticket->id,
+                'user_id' => $user->id,
+                'role' => $role,
+            ]);
+        }
+    }
+
+    /**
+     * Admin manually joins a ticket as viewer
+     *
+     * @param Ticket $ticket
+     * @param User $admin Admin joining
+     */
+    public function joinTicket(Ticket $ticket, User $admin): void
+    {
+        $this->addParticipant($ticket, $admin, 'viewer');
+
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'changed_by' => $admin->id,
+            'action_type' => 'participant_joined',
+            'old_values' => null,
+            'new_values' => ['user_id' => $admin->id, 'role' => 'viewer'],
+            'created_at' => now(),
+        ]);
     }
 }

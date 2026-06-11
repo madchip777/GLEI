@@ -5,7 +5,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import SuperAdminDashboard from './pages/SuperAdminDashboard';
+// import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import Tickets from './pages/Tickets.jsx';
 import CreateTicket from './pages/CreateTicket.jsx';
 import TicketDetail from './pages/TicketDetail.jsx';
@@ -117,16 +117,6 @@ function App() {
                 element={
                   <PrivateRoute roles={['admin', 'super_admin']}>
                     <AdminDashboard />
-                  </PrivateRoute>
-                }
-            />
-
-            {/* Protected routes - Super Admin only */}
-            <Route
-                path="/super-admin"
-                element={
-                  <PrivateRoute roles={['super_admin']}>
-                    <SuperAdminDashboard />
                   </PrivateRoute>
                 }
             />

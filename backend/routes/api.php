@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\SoftwareController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TwoFactorController;
 use App\Http\Controllers\Api\UserController;
+use App\Mail\PasswordResetMail;
+use App\Mail\UserCreatedMail;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserDashboardController;
@@ -19,19 +23,19 @@ use App\Http\Controllers\Api\SuperAdminController;
 */
 
 Route::get('/test-email', function () {
-    $user = \App\Models\User::first();
+    $user = User::first();
 
     // Test USerCreatedMail
-    \Illuminate\Support\Facades\Mail::to($user->email)
-        ->send(new \App\Mail\UserCreatedMail($user, 'temporaryPassword123'));
+    Mail::to($user->email)
+        ->send(new UserCreatedMail($user, 'temporaryPassword123'));
 
     // Tes PasswordResetMAil - reset link
-    \Illuminate\Support\Facades\Mail::to($user->email)
-        ->send(new \App\Mail\PasswordResetMail($user, 'http://localhost:5173/reset-password?token=abc123'));
+    Mail::to($user->email)
+        ->send(new PasswordResetMail($user, 'http://localhost:5173/reset-password?token=abc123'));
 
     // Test PasswordResetMail - admin reset
-    \Illuminate\Support\Facades\Mail::to($user->email)
-        ->send(new \App\Mail\PasswordResetMail($user, null, 'NewTemporaryPassword123'));
+    Mail::to($user->email)
+        ->send(new PasswordResetMail($user, null, 'NewTemporaryPassword123'));
 
     return response()->json(['message' => 'All test email sent! Check Mailpit at http://localhost:8025']);
 });
@@ -65,6 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- User dashboard (accessible by all authenticated users) ---
     Route::get('/dashboard', [UserDashboardController::class, 'dashboard']);
 
+    // Get list of admins for ticket assignment
+    Route::middleware('role:admin,super_admin')->get('/admins', [UserController::class, 'listAdmins']);
+
     // Ticket operation (all authenticated users)
     Route::prefix('tickets')->group(function () {
         Route::post('/', [TicketController::class, 'store']);
@@ -78,6 +85,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Images serving (protected, with access control)
         Route::get('/{id}/images/{imageId}/view', [TicketController::class, 'viewImageById']);
+
+        // Admin only actions
+        Route::middleware('role:admin,super_admin')->group(function () {
+            Route::post('/{id}/assign', [TicketController::class, 'assign']);
+            Route::post('/{id}/status', [TicketController::class, 'updateStatus']);
+            Route::post('/{id}/priority', [TicketController::class, 'updatePriority']);
+            Route::post('/{id}/join', [TicketController::class, 'join']);
+        });
     });
 
     // --- Hardware management (admin and super_admin) ---

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
 use App\Models\TicketImage;
+use App\Models\User;
 use App\Services\TicketService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -135,8 +136,8 @@ class TicketController
     /**
      * Get Ticket Details
      *
-     * Returns dull ticket  with messages and history.
-     * USer must  have access to the ticket.
+     * Returns ticket with messages and history.
+     * User must  have access to the ticket.
      *
      * @route GET /api/tickets/{id}
      * @access Protected (requires auth:sanctum)
@@ -152,23 +153,23 @@ class TicketController
     public function show(Request $request, int $id): JsonResponse
     {
         try {
-            // Find ticket
+            Log::info('Fetching ticket', ['id' => $id]);
+
             $ticket = Ticket::with([
                 'messages' => function ($query) {
-                    Log::info('Loading messages with images relationship');
-                    $query->with('user', 'images')->orderBy('created_at', 'asc');
+                    $query->with(['user', 'images'])->orderBy('created_at', 'asc');
                 },
                 'history' => function ($query) {
-                    $query->orderBy('created_at', 'desc');
+                    $query->with('changedBy')->orderBy('created_at', 'desc');
                 },
-                'creator'
+                'creator',
+                'assignedTo',
+                'participants.user',
             ])->findOrFail($id);
 
             Log::info('Ticket loaded successfully', ['ticket_id' => $ticket->id]);
 
-            // Check access
             if (!$ticket->canAccess($request->user())) {
-                Log::warning('Access denied to ticket', ['ticket_id' => $id, 'user_id']);
                 return response()->json([
                     'success' => false,
                     'message' => 'You do not have access to this ticket',
@@ -188,30 +189,52 @@ class TicketController
                         'category' => $ticket->category,
                         'created_at' => $ticket->created_at,
                         'creator' => $ticket->creator,
+                        'assigned_to' => $ticket->assignedTo ? [
+                            'id' => $ticket->assignedTo->id,
+                            'name' => $ticket->assignedTo->name,
+                            'email' => $ticket->assignedTo->email,
+                        ] : null,
+                        'participants' => $ticket->participants->map(fn($p) => [
+                            'id' => $p->id,
+                            'role' => $p->role,
+                            'user' => [
+                                'id' => $p->user->id,
+                                'name' => $p->user->name,
+                                'email' => $p->user->email,
+                                'role' => $p->user->role,
+                            ],
+                        ]),
+                        'history' => $ticket->history->map(fn($h) => [
+                            'id' => $h->id,
+                            'action_type' => $h->action_type,
+                            'old_values' => $h->old_values,
+                            'new_values' => $h->new_values,
+                            'created_at' => $h->created_at,
+                            'changed_by' => $h->changedBy ? [
+                                'id' => $h->changedBy->id,
+                                'name' => $h->changedBy->name,
+                            ] : null,
+                        ]),
                         'messages' => $ticket->messages,
-                        'history' => $ticket->history,
                     ],
                 ],
             ], 200);
 
         } catch (ModelNotFoundException $exception) {
-            Log::error('Ticket not found', ['id' => $id]);
             return response()->json([
                 'success' => false,
                 'message' => 'Ticket not found',
             ], 404);
-
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             Log::error('Error fetching ticket', [
                 'id' => $id,
                 'error' => $exception->getMessage(),
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
-                'trace' => $exception->getTraceAsString()
             ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching ticket',
+                'message' => 'Error fetching ticket: ' . $exception->getMessage(),
             ], 500);
         }
     }
@@ -452,6 +475,138 @@ class TicketController
                 ['message' => 'Error serving image'],
                 500
             );
+        }
+    }
+
+    /**
+     * Assign ticket to an admin
+     *
+     * @route POST /api/tickets/{id}/assign
+     * @access admin, super_admin
+     */
+    public function assign(Request $request, int $id): JsonResponse
+    {
+        try {
+            $ticket = Ticket::findOrFail($id);
+
+            $validated = $request->validate([
+                'admin_id' => 'required|exists:users,id',
+            ]);
+
+            $admin = User::findOrFail($validated['admin_id']);
+
+            if (!$admin->isAdmin() && !$admin->isSuperAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User must be an admin or super admin',
+                ], 422);
+            }
+
+            $ticket = $this->ticketService->assignTicket($ticket, $admin, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket assigned successfully',
+                'data' => ['assigned_to' => [
+                    'id' => $admin->id,
+                    'name' => $admin->name,
+                    'email' => $admin->email,
+                ]],
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Not found'], 404);
+        } catch (\Exception $e) {
+            Log::error('Failed to assign ticket', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to assign ticket'], 500);
+        }
+    }
+
+    /**
+     * Update ticket status
+     *
+     * @route POST /api/tickets/{id}/status
+     * @access admin, super_admin
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        try {
+            $ticket = Ticket::findOrFail($id);
+
+            $validated = $request->validate([
+                'status' => 'required|string|in:open,in_progress,resolved,closed',
+            ]);
+
+            $ticket = $this->ticketService->updateStatus($ticket, $validated['status'], $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'data' => ['status' => $ticket->status],
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Ticket not found'], 404);
+        } catch (\Exception $e) {
+            Log::error('Failed to update ticket status', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update status'], 500);
+        }
+    }
+
+    /**
+     * Update ticket priority
+     *
+     * @route POST /api/tickets/{id}/priority
+     * @access admin, super_admin
+     */
+    public function updatePriority(Request $request, int $id): JsonResponse
+    {
+        try {
+            $ticket = Ticket::findOrFail($id);
+
+            $validated = $request->validate([
+                'priority' => 'required|string|in:low,medium,high,critical',
+            ]);
+
+            $ticket = $this->ticketService->updatePriority($ticket, $validated['priority'], $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Priority updated successfully',
+                'data' => ['priority' => $ticket->priority],
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Ticket not found'], 404);
+        } catch (\Exception $e) {
+            Log::error('Failed to update ticket priority', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update priority'], 500);
+        }
+    }
+
+    /**
+     * Admin joins a ticket as participant
+     *
+     * @route POST /api/tickets/{id}/join
+     * @access admin, super_admin
+     */
+    public function join(Request $request, int $id): JsonResponse
+    {
+        try {
+            $ticket = Ticket::findOrFail($id);
+
+            $this->ticketService->joinTicket($ticket, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Joined ticket successfully',
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Ticket not found'], 404);
+        } catch (\Exception $e) {
+            Log::error('Failed to join ticket', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to join ticket'], 500);
         }
     }
 }

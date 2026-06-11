@@ -352,4 +352,36 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * List admin and super_admin users for ticket assignment
+     *
+     * @route GET /api/admins
+     * @access admin, super_admin
+     */
+    public function listAdmins(Request $request): JsonResponse
+    {
+        try {
+            $admins = User::whereIn('role', ['admin', 'super_admin'])
+                ->orderBy('name')
+                ->get()
+                ->map(fn($u) => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'role' => $u->role,
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => ['admins' => $admins],
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to list admins', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve admins',
+            ], 500);
+        }
+    }
 }

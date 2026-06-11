@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import { ticketAPI } from "../services/api.js";
+import { ticketAPI, userAPI } from "../services/api.js";
 import { fetchThumbnailById } from "../services/imageService.js";
 import Navbar from "../components/Navbar.jsx";
 import '../styles/tickets.css';
@@ -38,6 +38,14 @@ const TicketDetail = () => {
     const [selectedImages, setSelectedImages] = useState([]);
     const [sendingMessage, setSendingMessage] = useState(false);
     const [messageError, setMessageError] = useState('');
+
+    // Admin actions state
+    const [admins, setAdmins] = useState([]);
+    const [assigningAdmin, setAssigningAdmin] = useState('');
+    const [updatingStatus, setUpdatingStatus] = useState(false);
+    const [updatingPriority, setUpdatingPriority] = useState(false);
+    const [assigning, setAssigning] = useState(false);
+    const [joining, setJoining] = useState(false);
 
     // Image upload state
     const fileInputRef = useRef(null);
@@ -83,36 +91,38 @@ const TicketDetail = () => {
     }, [authLoading, id]);
 
     /**
-     * set up polling for new messages
-     * Polls every 3 seconds when user can reply
+     * Set up polling for new messages
+     * Polls every 3 seconds for all authenticated users on non-draft tickets
      */
     useEffect(() => {
         if (!ticket) return;
+        if (ticket.status === 'draft') return;
 
-        // Only poll if user can reply to ticket
-        if (ticket.canReply || user?.role === 'admin' || user?.role === 'super_admin') {
-            const interval = setInterval(async () => {
-                try {
-                    const response = await ticketAPI.getTicket(id);
-                    const newMessages = response.data.data.ticket.messages || [];
+        const interval = setInterval(async () => {
+            try {
+                const response = await ticketAPI.getTicket(id);
+                const updatedTicket = response.data.data.ticket;
+                const newMessages = updatedTicket.messages || [];
 
-                    // Only update if there are new messages
-                    if (newMessages.length > messages.length) {
-                        setMessages(newMessages);
-                        // Auto-scroll to bottom
-                        setTimeout(() => {
-                            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                    }
-                } catch (err) {
-                    console.error('Polling error:', err);
+                // Update messages if new ones arrived
+                if (newMessages.length > messages.length) {
+                    setMessages(newMessages);
+                    setTimeout(() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
                 }
-            }, 3000); // Poll every 3 seconds
 
-            return () => clearInterval(interval);
-        }
+                // Always update ticket data (status, participants, etc. may have changed)
+                setTicket(updatedTicket);
 
-    }, [ticket, id, messages.length, user]);
+            } catch (err) {
+                console.error('Polling error:', err);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
+
+    }, [ticket?.id, ticket?.status, messages.length]);
 
     /**
      * Auto-scroll to bottom when message change
@@ -162,6 +172,25 @@ const TicketDetail = () => {
             loadImages();
         }
     }, [messages, id]);
+
+    /**
+     * Load admins for assignment dropdown
+     * Only runs for admin/super_admin users
+     */
+    useEffect(() => {
+        if (user?.role !== 'admin' && user?.role !== 'super_admin') return;
+
+        const loadAdmins = async () => {
+            try {
+                const response = await userAPI.listAdmins();
+                setAdmins(response.data.data.admins);
+            } catch (err) {
+                console.error('Failed to load admins:', err);
+            }
+        };
+
+        loadAdmins();
+    }, [user]);
 
     /**
      * Handle image file selection
@@ -305,6 +334,68 @@ const TicketDetail = () => {
     };
 
     /**
+     * Assign ticket to an admin
+     */
+    const handleAssign = async () => {
+        if (!assigningAdmin) return;
+        setAssigning(true);
+        try {
+            await ticketAPI.assign(id, parseInt(assigningAdmin));
+            await fetchTicket();
+            setAssigningAdmin('');
+        } catch (error) {
+            setError(`Failed to assign ticket: ${error}`);
+        } finally {
+            setAssigning(false);
+        }
+    };
+
+    /**
+     * Update ticket status
+     */
+    const handleStatusChange = async (newStatus) => {
+        setUpdatingStatus(true);
+        try {
+            await ticketAPI.updateStatus(id, newStatus);
+            await fetchTicket();
+        } catch (error) {
+            setError(`Failed to update status: ${error}`);
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
+
+    /**
+     * Update ticket priority
+     */
+    const handlePriorityChange = async (newPriority) => {
+        setUpdatingPriority(true);
+        try {
+            await ticketAPI.updatePriority(id, newPriority);
+            await fetchTicket();
+        } catch (error) {
+            setError(`Failed to update priority: ${error}`);
+        } finally {
+            setUpdatingPriority(false);
+        }
+    };
+
+    /**
+     * Admin joins ticket as participant
+     */
+    const handleJoin = async () => {
+        setJoining(true);
+        try {
+            await ticketAPI.join(id);
+            await fetchTicket();
+        } catch (error) {
+            setError(`Failed to join ticket : ${error}`);
+        } finally {
+            setJoining(false);
+        }
+    };
+
+    /**
      * View original image securely with auth
      */
     const handleViewImage = async (image) => {
@@ -352,39 +443,6 @@ const TicketDetail = () => {
             .slice(0, 2) || '?';
     };
 
-    /**
-     * DEBUG: Log values to console
-     */
-    useEffect(() => {
-        if (ticket && user) {
-            console.log('=== TICKET DETAIL DEBUG ===');
-            console.log('User object:', {
-                id: user?.id,
-                name: user?.name,
-                role: user?.role,
-                type_of_id: typeof user?.id
-            });
-            console.log('Ticket object:', {
-                id: ticket.id,
-                user_id: ticket.user_id,
-                status: ticket.status,
-                type_of_user_id: typeof ticket.user_id
-            });
-            console.log('Condition checks:', {
-                is_creator: user?.id === ticket.user_id,
-                is_admin: user?.role === 'admin',
-                is_super_admin: user?.role === 'super_admin',
-                is_not_closed: ticket.status !== 'closed',
-                should_show_form: (
-                    user?.id === ticket.user_id
-                    || user?.role === 'admin'
-                    || user?.role === 'super_admin'
-                ) && ticket.status !== 'closed'
-                && ticket.status !== 'draft'
-            });
-        }
-    }, [ticket, user]);
-
     // Loading state
     if (authLoading || loading) {
         return (
@@ -396,6 +454,11 @@ const TicketDetail = () => {
             </>
         );
     }
+
+    /**
+     * Check if current user is already a participant
+     */
+    const isParticipant = ticket?.participants?.some(p => p.user.id === user?.id);
 
     if (error && !ticket) {
         return (
@@ -423,16 +486,12 @@ const TicketDetail = () => {
                 <button
                     onClick={() => navigate('/tickets')}
                     style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#3498db',
-                        cursor: 'pointer',
-                        fontSize: '0.95rem',
-                        marginBottom: '1.5rem',
-                        padding: 0,
+                        background: 'none', border: 'none', color: '#3498db',
+                        cursor: 'pointer', fontSize: '0.95rem',
+                        marginBottom: '1.5rem', padding: 0,
                     }}
                 >
-                    Back to Tickets
+                    ← Back to Tickets
                 </button>
 
                 {/* Ticket Header */}
@@ -448,26 +507,38 @@ const TicketDetail = () => {
                         <div className="ticket-meta-item">
                             <span className="ticket-meta-label">Status</span>
                             <span className={`status-badge status-${ticket.status}`}>
-                                {ticket.status.replace('_', ' ')}
-                            </span>
+                            {ticket.status.replace('_', ' ')}
+                        </span>
                         </div>
                         <div className="ticket-meta-item">
                             <span className="ticket-meta-label">Priority</span>
                             <span className={`priority-badge priority-${ticket.priority}`}>
-                                {ticket.priority}
-                            </span>
+                            {ticket.priority}
+                        </span>
                         </div>
                         <div className="ticket-meta-item">
                             <span className="ticket-meta-label">Category</span>
                             <span className="ticket-meta-value">
-                                {ticket.category?.replace('_', ' ') || 'General'}
-                            </span>
+                            {ticket.category?.replace('_', ' ') || 'General'}
+                        </span>
                         </div>
                         <div className="ticket-meta-item">
                             <span className="ticket-meta-label">Created</span>
                             <span className="ticket-meta-value">
-                                {new Date(ticket.created_at).toLocaleDateString()}
-                            </span>
+                            {new Date(ticket.created_at).toLocaleDateString()}
+                        </span>
+                        </div>
+                        <div className="ticket-meta-item">
+                            <span className="ticket-meta-label">Assigned To</span>
+                            <span className="ticket-meta-value">
+                            {ticket.assigned_to ? ticket.assigned_to.name : '—'}
+                        </span>
+                        </div>
+                        <div className="ticket-meta-item">
+                            <span className="ticket-meta-label">Created By</span>
+                            <span className="ticket-meta-value">
+                            {ticket.creator?.name || '—'}
+                        </span>
                         </div>
                     </div>
 
@@ -476,40 +547,199 @@ const TicketDetail = () => {
                         <h3 style={{ color: '#34495e', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
                             Description
                         </h3>
-                        <div className="ticket-description">
-                            {ticket.description}
-                        </div>
+                        <div className="ticket-description">{ticket.description}</div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="ticket-actions">
                         {ticket.status === 'draft' && (
-                            <button
-                                onClick={handleSubmitTicket}
-                                className="ticket-action-btn primary"
-                            >
+                            <button onClick={handleSubmitTicket} className="ticket-action-btn primary">
                                 Submit Ticket
                             </button>
                         )}
-                        <button
-                            onClick={() => navigate('/tickets')}
-                            className="ticket-action-btn"
-                        >
+                        <button onClick={() => navigate('/tickets')} className="ticket-action-btn">
                             Close
                         </button>
                     </div>
                 </div>
 
-                {/* Messages Section */}
-                <div style={{ marginTop: '2rem' }}>
+                {/* ===== ADMIN PANEL ===== */}
+                {(user?.role === 'admin' || user?.role === 'super_admin') &&
+                    ticket.status !== 'draft' &&
+                    user?.id !== ticket.user_id && (
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '10px',
+                        padding: '1.5rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                        marginTop: '1.5rem',
+                        borderLeft: '4px solid #3498db',
+                    }}>
+                        <h3 style={{ color: '#2c3e50', marginTop: 0, marginBottom: '1rem', fontSize: '1rem' }}>
+                            Admin Actions
+                        </h3>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+
+                            {/* Assign */}
+                            <div style={{ flex: '1', minWidth: '200px' }}>
+                                <label style={{ fontSize: '0.8rem', color: '#7f8c8d', display: 'block', marginBottom: '0.4rem' }}>
+                                    Assign To
+                                </label>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <select
+                                        value={assigningAdmin}
+                                        onChange={e => setAssigningAdmin(e.target.value)}
+                                        style={{ flex: 1, padding: '0.5rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
+                                        disabled={assigning}
+                                    >
+                                        <option value="">Select admin...</option>
+                                        {admins.map(a => (
+                                            <option key={a.id} value={a.id}>{a.name}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={handleAssign}
+                                        disabled={!assigningAdmin || assigning}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: '#3498db',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                        }}
+                                    >
+                                        {assigning ? '...' : 'Assign'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Status */}
+                            <div style={{ flex: '1', minWidth: '200px' }}>
+                                <label style={{ fontSize: '0.8rem', color: '#7f8c8d', display: 'block', marginBottom: '0.4rem' }}>
+                                    Change Status
+                                </label>
+                                <select
+                                    value={ticket.status}
+                                    onChange={e => handleStatusChange(e.target.value)}
+                                    disabled={updatingStatus}
+                                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
+                                >
+                                    {['open', 'in_progress', 'resolved', 'closed'].map(s => (
+                                        <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Priority */}
+                            <div style={{ flex: '1', minWidth: '200px' }}>
+                                <label style={{ fontSize: '0.8rem', color: '#7f8c8d', display: 'block', marginBottom: '0.4rem' }}>
+                                    Change Priority
+                                </label>
+                                <select
+                                    value={ticket.priority}
+                                    onChange={e => handlePriorityChange(e.target.value)}
+                                    disabled={updatingPriority}
+                                    style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.85rem' }}
+                                >
+                                    {['low', 'medium', 'high', 'critical'].map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Join */}
+                            {!isParticipant && (
+                                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                                    <button
+                                        onClick={handleJoin}
+                                        disabled={joining}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: '#27ae60',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                        }}
+                                    >
+                                        {joining ? 'Joining...' : '+ Join Ticket'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {isParticipant && (
+                                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                                <span style={{ fontSize: '0.85rem', color: '#27ae60', padding: '0.5rem' }}>
+                                    You are a participant
+                                </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ===== PARTICIPANTS ===== */}
+                {ticket.participants?.length > 0 && (
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '10px',
+                        padding: '1.5rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                        marginTop: '1.5rem',
+                    }}>
+                        <h3 style={{ color: '#2c3e50', marginTop: 0, marginBottom: '1rem', fontSize: '1rem' }}>
+                            Participants ({ticket.participants.length})
+                        </h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                            {ticket.participants.map(p => (
+                                <div key={p.id} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    background: '#f8f9fa',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '20px',
+                                    fontSize: '0.85rem',
+                                }}>
+                                    <div style={{
+                                        width: '28px', height: '28px',
+                                        borderRadius: '50%',
+                                        background: p.role === 'assigned' ? '#3498db' : p.role === 'creator' ? '#2c3e50' : '#95a5a6',
+                                        color: 'white',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '0.75rem', fontWeight: '700',
+                                    }}>
+                                        {p.user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                                    </div>
+                                    <span>{p.user.name}</span>
+                                    <span style={{
+                                        fontSize: '0.7rem',
+                                        background: p.role === 'assigned' ? '#cce5ff' : p.role === 'creator' ? '#e2e3e5' : '#d4edda',
+                                        color: p.role === 'assigned' ? '#004085' : p.role === 'creator' ? '#383d41' : '#155724',
+                                        padding: '1px 6px',
+                                        borderRadius: '10px',
+                                    }}>
+                                    {p.role}
+                                </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ===== MESSAGES ===== */}
+                <div style={{ marginTop: '1.5rem' }}>
                     <h2 style={{ color: '#34495e', marginBottom: '1rem' }}>Messages</h2>
 
-                    {/* Messages List */}
                     {messages.length > 0 ? (
                         <div className="ticket-messages">
                             <div className="message-list">
                                 {messages.map(message => {
-                                    const { time} = formatDateTime(message.created_at);
+                                    const { time } = formatDateTime(message.created_at);
                                     return (
                                         <div key={message.id} className="message-item">
                                             <div className="message-avatar">
@@ -518,24 +748,19 @@ const TicketDetail = () => {
                                             <div className="message-content">
                                                 <div className="message-header">
                                                     <div>
-                                                        <span className="message-author">
-                                                            {message.user?.name || "Unknown USer"}
-                                                        </span>
+                                                    <span className="message-author">
+                                                        {message.user?.name || 'Unknown User'}
+                                                    </span>
                                                         {message.user?.email && (
                                                             <span className="message-email">
-                                                                {message.user.email}
-                                                            </span>
+                                                            {message.user.email}
+                                                        </span>
                                                         )}
                                                     </div>
-                                                    <span className="message-time">
-                                                        {time}
-                                                    </span>
+                                                    <span className="message-time">{time}</span>
                                                 </div>
-                                                <div className="message-body">
-                                                    {message.content}
-                                                </div>
+                                                <div className="message-body">{message.content}</div>
 
-                                                {/* Image attachement - if message has an image */}
                                                 {message.images && message.images.length > 0 && (
                                                     <div className="message-images" style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                                         {message.images.map((image, imgIndex) => (
@@ -544,7 +769,7 @@ const TicketDetail = () => {
                                                                     src={imageDataUrls[message.id]?.[imgIndex]?.dataUrl}
                                                                     alt={`Attachment ${imgIndex + 1}`}
                                                                     className="message-image-thumbnail"
-                                                                    onClick={() => handleViewImage(image, message.id)}
+                                                                    onClick={() => handleViewImage(image)}
                                                                     title="Click to view original image"
                                                                     style={{ cursor: 'pointer', maxWidth: '150px' }}
                                                                 />
@@ -561,33 +786,23 @@ const TicketDetail = () => {
                         </div>
                     ) : (
                         <div style={{
-                            backgroundColor: '#f8f9fa',
-                            padding: '2rem',
-                            borderRadius: '8px',
-                            textAlign: 'center',
-                            color: '#7f8c8d',
+                            backgroundColor: '#f8f9fa', padding: '2rem',
+                            borderRadius: '8px', textAlign: 'center', color: '#7f8c8d',
                         }}>
-                            <p>No messages yet. Start a conversation by adding a message below.</p>
+                            <p>No messages yet.</p>
                         </div>
                     )}
                 </div>
 
-                {/* Message Form */}
-                {(
-                    user?.id === ticket.user_id ||
-                    user?.role === 'admin' ||
-                    user?.role === 'super_admin') &&
-                    ticket.status !== 'closed' &&
-                    ticket.status !== 'draft' && (
+                {/* ===== MESSAGE FORM ===== */}
+                {(user?.id === ticket.user_id || user?.role === 'admin' || user?.role === 'super_admin') &&
+                    ticket.status !== 'closed' && ticket.status !== 'draft' && (
                         <div className="message-form" style={{ marginTop: '2rem' }}>
-                            <h3 style={{ color: '#34495e', marginBottom: '1rem' }}>
-                                Add Message
-                            </h3>
+                            <h3 style={{ color: '#34495e', marginBottom: '1rem' }}>Add Message</h3>
 
                             {messageError && <div className="error-alert">{messageError}</div>}
 
                             <form onSubmit={handleSendMessage}>
-                                {/* Message textarea */}
                                 <div className="form-group-textarea">
                                     <label className="form-label">Message</label>
                                     <textarea
@@ -603,7 +818,6 @@ const TicketDetail = () => {
                                     </p>
                                 </div>
 
-                                {/* Image upload */}
                                 <div className="form-group-textarea">
                                     <label className="form-label">Attach Images</label>
                                     <div
@@ -613,12 +827,8 @@ const TicketDetail = () => {
                                         onDrop={handleDrop}
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        <div className="image-upload-text">
-                                            Drag and drop images here or click to select
-                                        </div>
-                                        <div className="image-upload-hint">
-                                            Max 5MB per image (JPEG, PNG, GIF)
-                                        </div>
+                                        <div className="image-upload-text">Drag and drop images here or click to select</div>
+                                        <div className="image-upload-hint">Max 5MB per image (JPEG, PNG, GIF)</div>
                                         <input
                                             ref={fileInputRef}
                                             type="file"
@@ -629,7 +839,6 @@ const TicketDetail = () => {
                                         />
                                     </div>
 
-                                    {/* Selected images preview */}
                                     {selectedImages.length > 0 && (
                                         <div style={{ marginBottom: '1rem' }}>
                                             <p style={{ fontSize: '0.85rem', color: '#7f8c8d', marginBottom: '0.5rem' }}>
@@ -638,19 +847,9 @@ const TicketDetail = () => {
                                             <div className="image-preview">
                                                 {selectedImages.map((image, index) => (
                                                     <div key={index} className="image-preview-item">
-                                                        <img
-                                                            src={image.previewUrl}
-                                                            alt={`Preview ${index}`}
-                                                            className="image-preview-img"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeImage(index)}
-                                                            className="image-preview-remove"
-                                                            title="Remove"
-                                                        >
-                                                            X
-                                                        </button>
+                                                        <img src={image.previewUrl} alt={`Preview ${index}`} className="image-preview-img" />
+                                                        <button type="button" onClick={() => removeImage(index)}
+                                                                className="image-preview-remove" title="Remove">×</button>
                                                     </div>
                                                 ))}
                                             </div>
@@ -658,7 +857,6 @@ const TicketDetail = () => {
                                     )}
                                 </div>
 
-                                {/* Submit button */}
                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                     <button
                                         type="submit"
@@ -672,17 +870,53 @@ const TicketDetail = () => {
                         </div>
                     )}
 
-                {/* No reply allowed message */}
+                {/* Closed notice */}
                 {ticket.status === 'closed' && (
                     <div style={{
-                        backgroundColor: '#f8f9fa',
-                        padding: '1.5rem',
-                        borderRadius: '8px',
-                        marginTop: '2rem',
-                        color: '#7f8c8d',
+                        backgroundColor: '#f8f9fa', padding: '1.5rem',
+                        borderRadius: '8px', marginTop: '2rem', color: '#7f8c8d',
                         borderLeft: '3px solid #95a5a6',
                     }}>
                         <p>This ticket is closed. You cannot add new messages.</p>
+                    </div>
+                )}
+
+                {/* ===== HISTORY ===== */}
+                {ticket.history?.length > 0 && (
+                    <div style={{
+                        background: 'white', borderRadius: '10px',
+                        padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                        marginTop: '1.5rem', marginBottom: '2rem',
+                    }}>
+                        <h3 style={{ color: '#2c3e50', marginTop: 0, marginBottom: '1rem', fontSize: '1rem' }}>
+                            History
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {ticket.history.map(h => (
+                                <div key={h.id} style={{
+                                    display: 'flex', alignItems: 'flex-start',
+                                    gap: '0.75rem', padding: '0.5rem 0',
+                                    borderBottom: '1px solid #f0f0f0', fontSize: '0.85rem',
+                                }}>
+                                <span style={{ color: '#7f8c8d', whiteSpace: 'nowrap', fontSize: '0.8rem' }}>
+                                    {new Date(h.created_at).toLocaleDateString('fr-FR', {
+                                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                    })}
+                                </span>
+                                    <span style={{ color: '#2c3e50' }}>
+                                    <strong>{h.changed_by?.name || 'System'}</strong>
+                                        {' '}
+                                        {h.action_type === 'created' && 'created the ticket'}
+                                        {h.action_type === 'submitted' && 'submitted the ticket'}
+                                        {h.action_type === 'assigned' && `assigned to ${h.new_values?.assigned_to ? admins.find(a => a.id === h.new_values.assigned_to)?.name || 'an admin' : 'unassigned'}`}
+                                        {h.action_type === 'status_changed' && `changed status from ${h.old_values?.status?.replace('_', ' ')} to ${h.new_values?.status?.replace('_', ' ')}`}
+                                        {h.action_type === 'priority_changed' && `changed priority from ${h.old_values?.priority} to ${h.new_values?.priority}`}
+                                        {h.action_type === 'participant_joined' && 'joined as participant'}
+                                        {h.action_type === 'closed' && 'closed the ticket'}
+                                </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

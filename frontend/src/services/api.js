@@ -350,7 +350,13 @@ export const ticketAPI = {
             }
         });
     },
-}
+
+    // Admin actions
+    assign: (id, adminId) => api.post(`/tickets/${id}/assign`, { admin_id: adminId }),
+    updateStatus: (id, status) => api.post(`/tickets/${id}/status`, { status }),
+    updatePriority: (id, priority) => api.post(`/tickets/${id}/priority`, { priority }),
+    join: (id) => api.post(`/tickets/${id}/join`),
+};
 
 /**
  * Password API Endpoints
@@ -410,6 +416,11 @@ export const userAPI = {
      * Reset user password (admin)
      */
     resetPassword: (id) => api.post(`/users/${id}/reset-password`),
+
+    /**
+     * Get admin and super_admin profile list
+     */
+    listAdmins: () => api.get('/admins'),
 };
 
 /**

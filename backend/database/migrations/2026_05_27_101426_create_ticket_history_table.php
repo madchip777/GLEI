@@ -25,12 +25,15 @@ return new class extends Migration
 
             // What changed
             $table->enum('action_type', [
-                'created',      // Ticket created
-                'status_changed', // Status changed
-                'assigned',     // Assigned to user
-                'unassigned',   // Unassigned from user
-                'priority_changed', // Priority changed
-                'category_changed'  // Category changed
+                'created',
+                'submitted',
+                'assigned',
+                'unassigned',
+                'status_changed',
+                'priority_changed',
+                'category_changed',
+                'participant_joined',
+                'closed',
             ]);
 
             // Previous and new values (JSON for flexibility)
