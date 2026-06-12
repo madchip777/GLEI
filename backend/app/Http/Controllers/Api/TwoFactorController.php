@@ -39,7 +39,9 @@ class TwoFactorController extends Controller
      */
     public function setup(Request $request): JsonResponse
     {
-        $setupToken = $request->header('X-setup-token');
+        $setupToken = $request->header('X-Setup-Token')
+            ?? $request->header('X-setup-token')
+            ?? $request->header('x-setup-token');
 
         if (!$setupToken) {
             return response()->json(['message' => 'Setup token required'], 401);
@@ -88,7 +90,9 @@ class TwoFactorController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $setupToken = $request->header('X-Setup-Token');
+        $setupToken = $request->header('X-Setup-Token')
+            ?? $request->header('X-setup-token')
+            ?? $request->header('x-setup-token');
 
         if (!$setupToken) {
             return response()->json(['message' => 'Setup token required'], 401);

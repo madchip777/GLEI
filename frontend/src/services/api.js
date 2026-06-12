@@ -55,7 +55,7 @@ const processQueue = (error, token = null) => {
 api.interceptors.request.use(
     (config) => {
         const token = sessionStorage.getItem('access_token');
-        if (token) {
+        if (token && token !== 'null' && token !== 'undefined') {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
@@ -92,6 +92,11 @@ api.interceptors.response.use(
                 hasRefreshToken: !!sessionStorage.getItem('refresh_token'),
                 isRefreshing,
             });
+        }
+
+        const publicRoutes = ['/2fa/setup', '/2fa/confirm', '/2fa/verify', '/password/forgot', '/password/reset', '/login'];
+        if (publicRoutes.some(route => originalRequest?.url?.includes(route))) {
+            return Promise.reject(error);
         }
 
         // Handle 401 Unauthorized errors (expired token)

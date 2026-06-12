@@ -62,6 +62,10 @@ const Login = () => {
             const response = await authAPI.login(email, password);
             const data =  response.data;
 
+            console.log('=== LOGIN RESPONSE ===', data);  // ← add this
+            console.log('requires_2fa_setup:', data.requires_2fa_setup);
+            console.log('requires_2fa:', data.requires_2fa);
+
             if (data.requires_2fa_setup) {
                 setSetupToken(data.setup_token);
                 await loadQrCode(data.setup_token);
