@@ -449,4 +449,7 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
-.idea/*
+.idea/workspace.xml
+database/database.sqlite
+/postman/*
+/.postman/*

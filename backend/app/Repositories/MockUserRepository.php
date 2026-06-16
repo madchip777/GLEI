@@ -5,7 +5,17 @@ namespace App\Repositories;
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 
-class MockUSerRepository implements UserRepositoryInterface
+/**
+ * Mock User Repository
+ *
+ * Database-backed implementation of UserRepositoryInterface.
+ * Named "Mock" for historical reasons but uses real database.
+ *
+ * This implementation uses Eloquent ORM to query the users table.
+ * Can be easily swapped with alternative implementations (cache, API, etc.)
+ * without changing business logic.
+ */
+class MockUserRepository implements UserRepositoryInterface
 {
     private array $users;
 
@@ -37,11 +47,30 @@ class MockUSerRepository implements UserRepositoryInterface
         ];
     }
 
+    /**
+     * Find user by email address
+     *
+     * Queries users rable for exact email match.
+     * Email is unique constraint in database.
+     *
+     * @param string $email User's email address
+     *
+     * @return User|null USer model if found, null if not found
+     */
     public function findByEmail(string $email): ?User
     {
         return User::where('email', $email)->first();
     }
 
+    /**
+     * Find user by primary key ID
+     *
+     * Uses Eloquent's find() method for efficient lookup.
+     *
+     * @param int $id User's primary key
+     *
+     * @return User|null User model if found, null if not found
+     */
     public function findById(int $id): ?User
     {
         return User::find($id);

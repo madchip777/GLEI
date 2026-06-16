@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #2c3e50;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        .body {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+        }
+        .credentials-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #2c3e50;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .credentials-box p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        .credentials-box strong {
+            display: inline-block;
+            width: 120px;
+            color: #7f8c8d;
+        }
+        .password {
+            font-family: monospace;
+            font-size: 1.1rem;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            letter-spacing: 2px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        .btn {
+            display: inline-block;
+            background: #2c3e50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #95a5a6;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2>GLEI Support System</h2>
+    <p>Account Created</p>
+</div>
+<div class="body">
+    <p>Hello <strong>{{ $user->name }}</strong>,</p>
+    <p>Your account has been created on the GLEI Support System. Here are your login credentials:</p>
+
+    <div class="credentials-box">
+        <p><strong>Email:</strong> {{ $user->email }}</p>
+        <p><strong>Password:</strong> <span class="password">{{ $temporaryPassword }}</span></p>
+        <p><strong>Role:</strong> {{ ucfirst(str_replace('_', ' ', $user->role)) }}</p>
+    </div>
+
+    <div class="warning">
+        <strong>⚠ Important:</strong> This is a temporary password.
+        You will be required to change it on your first login.
+        You will also be asked to set up two-factor authentication (2FA).
+    </div>
+
+    <p>To access the portal, click the button below:</p>
+    <a href="http://localhost:5173/login" class="btn">Access GLEI Portal</a>
+
+    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 20px;">
+        If you did not expect this email, please contact your system administrator immediately.
+    </p>
+
+    <div class="footer">
+        <p>This is an automated message from the GLEI Support System. Please do not reply to this email.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,562 @@
+/* =============================================
+    Tickets, messages, form, and chat interface
+   ============================================= */
+
+/* === Ticket List === */
+.ticket-list {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.ticket-item {
+    background-color: white;
+    border: 0.5px solid #dddddd;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background-color: #3498db;
+}
+
+.ticket-item-header {
+    flex: 1;
+}
+
+.ticket-item-title {
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.ticket-item-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.ticket-item-category {
+    background-color: #ecf0f1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.ticket-item-date {
+    color: #95a5a6;
+}
+
+/* === Ticket Detail View === */
+.ticket-detail {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.ticket-detail-header {
+    background-color: white;
+    border: 0.5px solid #dddddd;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.ticket-detail-title {
+    color: #2c3e50;
+    font-size: 1.75rem;
+    margin: 0 0 1rem 0;
+}
+
+.ticket-detail-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-meta-label {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.ticket-meta-value {
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.ticket-description {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    line-height: 1.6;
+    color: #34495e;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.ticket-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.ticket-action-btn {
+    padding: 0.75rem 1.5rem;
+    border: 0.5px solid #dddddd;
+    border-radius: 4px;
+    background-color: white;
+    color: #2c3e50;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.ticket-action-btn:hover {
+    background-color: #ecf0f1;
+    border-color: #95a5a6;
+}
+
+.ticket-action-btn.primary {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+}
+
+.ticket-action-btn.primary:hover {
+    background-color: #2980b9;
+}
+
+/* === Messages Chat === */
+.ticket-messages {
+    background-color: white;
+    border: 0.5px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.message-item {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.message-item:last-child {
+    border-bottom: none;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.message-content {
+    flex: 1;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.message-header > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.message-author {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    color: #95a5a6;
+}
+
+.message-email {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-left: 0.25rem;
+}
+
+.message-body {
+    color: #34495e;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-bottom: 0.75rem;
+}
+
+.message-image {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.message-image-thumbnail {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid #ecf0f1;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.message-image-thumbnail:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message-system {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    border-left: 3px solid #bdc3c7;
+}
+
+/* === Message Input Form === */
+.message-form {
+    background-color: white;
+    border: 0.5px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group-textarea {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.75rem;
+    border: 0.5px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+/* === Image Upload === */
+.image-upload-area {
+    border: 2px dashed #bdc3c7;
+    border-radius: 4px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+    background-color: #f8f9fa;
+}
+
+.image-upload-area:hover {
+    border-color: #3498db;
+    background-color: #ecf0f1;
+}
+
+.image-upload-area.drag-over {
+    border-color: #3498db;
+    background-color: #ecf0f1;
+    transform: scale(1.02);
+}
+
+.image-upload-text {
+    color: #7f8c8d;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.image-upload-hint {
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+
+.image-upload-input {
+    display: none;
+}
+
+.image-preview {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.image-preview-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.image-preview-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-preview-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: rgba(231, 76, 60, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.image-preview-remove:hover {
+    background-color: #e74c3c;
+}
+
+/* === Ticket Creation Form === */
+.ticket-form {
+    background-color: white;
+    border: 0.5px solid #ddd;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.ticket-form-title {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.ticket-form-group-last {
+    margin-bottom: 2rem;
+}
+
+.form-input-text,
+.form-input-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 0.5px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-input-text:focus,
+.form-input-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.form-input-select {
+    cursor: pointer;
+    background-color: white;
+}
+
+.form-button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.form-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-button-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.form-button-primary:hover {
+    background-color: #2980b9;
+}
+
+.form-button-secondary {
+    background-color: white;
+    color: #2c3e50;
+    border: 0.5px solid #ddd;
+}
+
+.form-button-secondary:hover {
+    background-color: #ecf0f1;
+}
+
+.form-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* === Status Badge === */
+.status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+}
+
+.status-draft {
+    background-color: #95a5a6;
+}
+
+.status-open {
+    background-color: #e74c3c;
+}
+
+.status-in_progress {
+    background-color: #f39c12;
+}
+
+.status-pending_info {
+    background-color: #9b59b6;
+}
+
+.status-resolved {
+    background-color: #27ae60;
+}
+
+.status-closed {
+    background-color: #34495e;
+}
+
+/* === Priority Badge === */
+.priority-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.priority-low {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.priority-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.priority-high {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.priority-critical {
+    background-color: #f5c6cb;
+    color: #721c24;
+    font-weight: bold;
+}
+
+/* === Loading States === */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ecf0f1;
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* === Empty State === */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #7f8c8d;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    font-size: 0.95rem;
+    color: #95a5a6;
+}
